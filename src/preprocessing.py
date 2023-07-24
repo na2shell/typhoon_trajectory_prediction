@@ -82,7 +82,8 @@ def main(device):
 
 
 if __name__ == "__main__":
-    traj_padded, _ = main()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    traj_padded, _ = main(device=device)
     print(traj_padded.size())
 
     for i in range(3):
