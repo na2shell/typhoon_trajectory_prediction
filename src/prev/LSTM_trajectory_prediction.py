@@ -5,7 +5,7 @@
 from keras.layers import Dense, Dropout, Conv1D, Flatten
 from keras import Model
 from keras.layers import Input, LSTM, Dense, Concatenate, MaxPooling1D
-import LSTM_preprocessing as pp
+import prev.LSTM_preprocessing as pp
 from keras.optimizers import Adam
 import glob as glob
 

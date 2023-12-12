@@ -13,8 +13,8 @@ from torch.utils.data import DataLoader
 
 torch.manual_seed(1)
 
-class LSTMTagger(nn.Module):
 
+class LSTMTagger(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, output_size):
         super(LSTMTagger, self).__init__()
         self.hidden_dim = hidden_dim
@@ -54,10 +54,27 @@ class discriminator(nn.Module):
 class generator(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(generator, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim)
-        self.fc1 = nn.Linear(hidden_dim, 43)
-    
+        lstm_input_dim = 128
+        self.dense = nn.Linear(input_dim, lstm_input_dim)
+        self.lstm = nn.LSTM(lstm_input_dim, hidden_dim)
+
+        self.fc_latlon = nn.Linear(hidden_dim, 2)  # [B, C, L]
+        self.fc_day = nn.Linear(hidden_dim, 7)  # [B, C, L]
+        self.fc_hour = nn.Linear(hidden_dim, 24)  # [B, C, L]
+        self.fc_category = nn.Linear(hidden_dim, 10)  # [B, C, L]
+
+        self.lat_center = 35
+        self.lng_center = 135
+
     def forward(self, x):
+        x = self.dense(x)
         x, _ = self.lstm(x)
         x = self.fc1(x)
-        return x
+
+        lat = x[:, 1, :] + self.lat_center
+        lng = x[:, 2, :] + self.lng_center
+        day = torch.max(x[:, 3 : 3 + 7, :])
+        hour = torch.max(x[:, 10 : 10 + 24, :])
+        category = torch.max(x[:, 34 : 34 + 10, :])
+
+        return x, lat, lng, day, hour, category

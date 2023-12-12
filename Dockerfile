@@ -71,13 +71,6 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         pyyaml \
         typing \
         && \
-    $PIP_INSTALL \
-        --pre torch torchvision torchaudio -f \
-        https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html \
-        && \
-    $PIP_INSTALL \
-        torch-geometric-temporal \
-        && \
 
 # ==================================================================
 # config & cleanup
