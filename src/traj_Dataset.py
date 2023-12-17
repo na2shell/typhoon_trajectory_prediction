@@ -1,60 +1,40 @@
 from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 import torch
+import numpy as np
+from utils import convert_onehot, convert_label_to_inger, build_encoder, build_int_encoder
+import geohash
 
-def build_encoder(original_vals):
-    # integer mapping using LabelEncoder
-    label_encoder = LabelEncoder()
-    integer_encoded = label_encoder.fit_transform(original_vals)
-    integer_encoded = integer_encoded.reshape(len(integer_encoded), 1)
-
-    # print(integer_encoded)
-
-    # One hot encoding
-    onehot_encoder = OneHotEncoder(sparse_output=False)
-    onehot_encoded = onehot_encoder.fit(integer_encoded)
-
-    return onehot_encoded
-
-
-def convert_onehot(df, encoder, col_name="day"):
-    onehot_encoded = encoder.transform(df[[col_name]])
-    onehot_df = pd.DataFrame(
-        onehot_encoded, columns=encoder.get_feature_names_out([col_name]))
-    onehot_df = onehot_df.astype(int)
-
-    return onehot_df
 
 class MyDataset(Dataset):
-    def __init__(self, data_path):
+    def __init__(self, df, encoder_dict, int_label_encoder):
         super().__init__()
-        self.data_path = data_path
-        df = pd.read_csv(self.data_path)
+        self.if_geohash = True
+        self.df = df
 
-        target_dict = {}
-        target_dict["day"] = ([i for i in range(7)])
-        target_dict["hour"] = ([i for i in range(24)])
-        target_dict["category"] = ([i for i in range(10)])
+        df_one_hot_position = self.calculate_geohash_onehot()
+        df_one_hot_position["tid"] = df["tid"]
+        df_target = df_one_hot_position
 
-        encoder_dict = {}
-
-        for col in ["day", "category", "hour"]:
-            target = target_dict[col]
-            encoder_dict[col] = build_encoder(target)
-
-        df_target = df[["tid", "lat", "lon"]]
         for col in ["day", "category", "hour"]:
             _encoder = encoder_dict[col]
             onehot_df = convert_onehot(df=df, encoder=_encoder, col_name=col)
             df_target = pd.concat([df_target, onehot_df], axis=1)
-        
-        self.df_target_class_indices = df[["tid", "lat", "lon", "day", "category", "hour"]]
+
+        self.df_target_class_indices = df[[
+            "tid", "lat", "lon", "day", "category", "hour"]]
         self.df_target = df_target
+
         self.len = df_target["tid"].nunique()
         self.tids = df_target["tid"].unique()
-        
+
+        df["label_int"] = convert_label_to_inger(int_label_encoder, df)
+
+        self.dict_tid_label = {}
+        for tid in self.tids:
+            label = df[df["tid"] == tid]["label_int"].head(1).values[0]
+            self.dict_tid_label[tid] = label
+
     def __len__(self):
         return self.len
 
@@ -68,11 +48,60 @@ class MyDataset(Dataset):
         df_tmp = self.df_target_class_indices[self.df_target_class_indices["tid"] == tid]
         df_tmp = df_tmp.drop("tid", axis=1)
         traj_class_indices = torch.tensor(df_tmp.values, dtype=torch.float)
+        label = torch.tensor(self.dict_tid_label[tid])
 
-        return traj, seq_len, traj_class_indices
+        return traj, seq_len, traj_class_indices, label
+
+    def calculate_geohash_onehot(self):
+        precision = 8
+        onehot_position_array = np.zeros((len(self.df), 5*precision))
+        latlon_array = self.df[["lat", "lon"]].values
+
+        base32 = ['0', '1', '2', '3', '4', '5', '6', '7',
+                  '8', '9', 'b', 'c', 'd', 'e', 'f', 'g',
+                  'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r',
+                  's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        binary = [np.asarray(list('{0:05b}'.format(x, 'b')), dtype=int)
+                  for x in range(0, len(base32))]
+        base32toBin = dict(zip(base32, binary))
+
+        for i, latlon in enumerate(latlon_array):
+            geo_code = geohash.encode(latlon[0], latlon[1], precision)
+            geo_code_array = np.concatenate([base32toBin[x] for x in geo_code])
+
+            onehot_position_array[i] = geo_code_array
+
+        print(onehot_position_array.shape)
+        df_one_hot_position = pd.DataFrame(onehot_position_array, columns=[
+                                           "position_onehot_{}".format(i) for i in range(5*precision)])
+
+        return df_one_hot_position
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
+    target_dict = {}
+    target_dict["day"] = ([i for i in range(7)])
+    target_dict["hour"] = ([i for i in range(24)])
+    target_dict["category"] = ([i for i in range(10)])
+
+    encoder_dict = {}
+
+    for col in ["day", "category", "hour"]:
+        target = target_dict[col]
+        encoder_dict[col] = build_encoder(target)
+
     data_path = "./dev_train_encoded_final.csv"
-    data_set = MyDataset(data_path=data_path)
-    traj = data_set[0]
+    df = pd.read_csv(data_path)
+    int_label_encoder = build_int_encoder(df["label"].unique())
+
+    data_set = MyDataset(df=df, encoder_dict=encoder_dict,
+                         int_label_encoder=int_label_encoder)
+    traj, seq_len, traj_class_indices, label = data_set[0]
+    print(label)
+
+    data_path = "./dev_test_encoded_final.csv"
+    df = pd.read_csv(data_path)
+    data_set = MyDataset(df=df, encoder_dict=encoder_dict,
+                         int_label_encoder=int_label_encoder)
+    traj, seq_len, traj_class_indices, label = data_set[0]
+    print(label)

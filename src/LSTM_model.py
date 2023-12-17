@@ -59,13 +59,13 @@ class generator(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(generator, self).__init__()
         lstm_input_dim = 43
-        self.dense = nn.Linear(input_dim, lstm_input_dim) # [B, L, C]
+        self.dense = nn.Linear(input_dim, lstm_input_dim)  # [B, L, C]
         self.lstm = nn.LSTM(lstm_input_dim, hidden_dim)
 
-        self.fc_latlon = nn.Linear(hidden_dim, 2)  
-        self.fc_day = nn.Linear(hidden_dim, 7)  
-        self.fc_hour = nn.Linear(hidden_dim, 24)  
-        self.fc_category = nn.Linear(hidden_dim, 10)  
+        self.fc_latlon = nn.Linear(hidden_dim, 2)
+        self.fc_day = nn.Linear(hidden_dim, 7)
+        self.fc_hour = nn.Linear(hidden_dim, 24)
+        self.fc_category = nn.Linear(hidden_dim, 10)
 
         self.lat_center = 35
         self.lng_center = 135
@@ -74,7 +74,7 @@ class generator(nn.Module):
         # print("input", x.size())
 
         # shape = x.shape # (B, L, C)
-        # x = x.reshape(-1, shape[-1]) 
+        # x = x.reshape(-1, shape[-1])
 
         x = self.dense(x)
         # print("dense", x.size())

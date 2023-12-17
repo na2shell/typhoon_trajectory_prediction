@@ -75,7 +75,7 @@ def main(device):
     traj_packed = nn.utils.rnn.pack_sequence(tensor_list, enforce_sorted=False)
     traj_padded, _ = nn.utils.rnn.pad_packed_sequence(
         traj_packed, batch_first=True, padding_value=-1)
-    
+
     traj_padded = traj_padded.to(device)
 
     return traj_padded, seq_len_list
