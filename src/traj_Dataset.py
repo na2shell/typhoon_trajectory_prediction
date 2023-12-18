@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 import pandas as pd
 import torch
 import numpy as np
-from utils import convert_onehot, convert_label_to_inger, build_encoder, build_int_encoder
+from utils import convert_onehot, convert_label_to_inger, build_encoder, build_int_encoder, time_collate_fn
 import geohash
 
 
@@ -98,6 +98,19 @@ if __name__ == "__main__":
                          int_label_encoder=int_label_encoder)
     traj, seq_len, traj_class_indices, label = data_set[0]
     print(label)
+
+    BATCH_SIZE = 16
+
+    train_dataloader = torch.utils.data.DataLoader(dataset=data_set,
+                                                   batch_size=BATCH_SIZE,
+                                                   shuffle=True,
+                                                   collate_fn=time_collate_fn,
+                                                   drop_last=True,
+                                                   num_workers=2)
+    
+    for data, traj_len, traj_class_indices, label, mask in train_dataloader:
+        print(mask.size())
+        exit()
 
     data_path = "./dev_test_encoded_final.csv"
     df = pd.read_csv(data_path)

@@ -11,8 +11,9 @@ def time_collate_fn(batch):
         traj_class_indices, batch_first=True, padding_value=111)
     seq_len = torch.stack(seq_len)
     labels = torch.stack(labels)
-
-    return x, seq_len, traj_class_indices, labels
+    mask = x[:, :, 1] == 99
+    
+    return x, seq_len, traj_class_indices, labels, mask
 
 
 
