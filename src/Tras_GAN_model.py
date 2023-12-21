@@ -13,70 +13,126 @@ from torch.nn.utils.rnn import pad_packed_sequence
 
 torch.manual_seed(1)
 
+
 class discriminator(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(discriminator, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim)
-        self.output_layer = nn.Linear(hidden_dim, output_dim)
+        self.precision = 8
+        each_hidden_dim = 128
 
-    def forward(self, x, last_position=-1):
-        # print("x", x.size())
-        x, (hn, cn) = self.lstm(x)
-        seq_unpacked, lens_unpacked = pad_packed_sequence(x, batch_first=True)
+        self.postion_last_index = 5 * self.precision
+        self.day_last_index = self.postion_last_index + 7
+        self.category_last_index = self.day_last_index + 10
 
-        # print("lstm output", hn[0], seq_unpacked[0, 11, :], lens_unpacked[0])
-        # print(x[:, -1, 1], hn.size(), hn)
-        x = self.output_layer(hn.squeeze())
-        return nn.Sigmoid()(x)
+        self.latlon_embbedding = nn.Linear(5 * self.precision, each_hidden_dim)
+        self.day_embbedding = nn.Linear(7, each_hidden_dim)
+        self.hour_embbedding = nn.Linear(24, each_hidden_dim)
+        self.category_embbedding = nn.Linear(10, each_hidden_dim)
 
-class encoder_generator(nn.Module):
+        self.dense = nn.Linear(each_hidden_dim, hidden_dim)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=each_hidden_dim * 4, nhead=4, batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
+
+        self.output_layer = nn.Linear(each_hidden_dim * 4, output_dim)
+
+    def forward(self, x, mask):
+        latlon_e = self.latlon_embbedding(x[:, :, : self.postion_last_index])
+        day_e = self.day_embbedding(
+            x[:, :, self.postion_last_index : self.postion_last_index + 7]
+        )
+        category_e = self.category_embbedding(
+            x[:, :, self.day_last_index : self.day_last_index + 10]
+        )
+        hour_e = self.hour_embbedding(x[:, :, self.category_last_index :])
+
+        embedding_all = torch.cat([latlon_e, day_e, category_e, hour_e], dim=2)
+
+        x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
+        x = torch.mean(x, dim=1)
+        x = self.output_layer(x)
+        x = nn.Sigmoid()(x)
+        return x
+
+
+class generator_encoder(nn.Module):
+    def __init__(self, hidden_dim):
+        super(generator_encoder, self).__init__()
+
+        self.precision = 8
+        each_hidden_dim = 128
+
+        self.postion_last_index = 5 * self.precision
+        self.day_last_index = self.postion_last_index + 7
+        self.category_last_index = self.day_last_index + 10
+
+        self.latlon_embbedding = nn.Linear(5 * self.precision, each_hidden_dim)
+        self.day_embbedding = nn.Linear(7, each_hidden_dim)
+        self.hour_embbedding = nn.Linear(24, each_hidden_dim)
+        self.category_embbedding = nn.Linear(10, each_hidden_dim)
+
+        self.dense = nn.Linear(each_hidden_dim, hidden_dim)
+
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=each_hidden_dim * 4, nhead=4, batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
+
+    def forward(self, x, mask):
+        latlon_e = self.latlon_embbedding(x[:, :, : self.postion_last_index])
+        day_e = self.day_embbedding(
+            x[:, :, self.postion_last_index : self.postion_last_index + 7]
+        )
+        category_e = self.category_embbedding(
+            x[:, :, self.day_last_index : self.day_last_index + 10]
+        )
+        hour_e = self.hour_embbedding(x[:, :, self.category_last_index :])
+
+        embedding_all = torch.cat([latlon_e, day_e, category_e, hour_e], dim=2)
+
+        x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
+
+        return x # [B, L, H], H is hiden
+
+
+class generator_decoder(nn.Module):
     def __init__(self):
-        super(encoder_generator, self).__init__()
-    
-    def forward(self, x):
-        pass
+        super(generator_decoder, self).__init__()
+        each_hidden_dim = 128
+        hidden_dim = 128
 
-
-class decoder_generator(nn.Module):
-    def __init__(self):
-        super(decoder_generator, self).__init__()
-    
-    def forward(self, x):
-        pass
-
-
-class generator(nn.Module):
-    def __init__(self, input_dim, hidden_dim):
-        super(generator, self).__init__()
-        lstm_input_dim = 43
-        self.dense = nn.Linear(input_dim, lstm_input_dim)  # [B, L, C]
-        self.lstm = nn.LSTM(lstm_input_dim, hidden_dim)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=each_hidden_dim * 4, nhead=4, batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
 
         self.fc_latlon = nn.Linear(hidden_dim, 2)
         self.fc_day = nn.Linear(hidden_dim, 7)
         self.fc_hour = nn.Linear(hidden_dim, 24)
         self.fc_category = nn.Linear(hidden_dim, 10)
 
-        self.lat_center = 35
-        self.lng_center = 135
-
-    def forward(self, x):
-        # print("input", x.size())
-
-        # shape = x.shape # (B, L, C)
-        # x = x.reshape(-1, shape[-1])
-
-        x = self.dense(x)
-        # print("dense", x.size())
-
-        # x = x.reshape(shape[0], shape[1], -1) # reshaping
-        # print("after dense size", x.size())
-
-        x, _ = self.lstm(x)
+    def forward(self, x, mask):
+        x = self.transformer_encoder(x, src_key_padding_mask=mask)
 
         lat_lon = self.fc_latlon(x)
         day = self.fc_day(x)
         hour = self.fc_hour(x)
         category = self.fc_category(x)
+
+        return lat_lon, day, hour, category
+
+
+        
+class generator(nn.Module):
+    def __init__(self, encoder, decoder):
+        super(generator, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+
+    def forward(self, x):
+        h = self.encoder(x)
+        lat_lon, day, hour, category = self.decoder(h)
 
         return lat_lon, day, hour, category
