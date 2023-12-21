@@ -22,7 +22,7 @@ D_optimizer = optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
 
 
 
-epoch_num = 10
+epoch_num = 1
 
 for _ in range(epoch_num):
     for i in range(30):
