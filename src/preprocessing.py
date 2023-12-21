@@ -75,14 +75,15 @@ def main(device):
     traj_packed = nn.utils.rnn.pack_sequence(tensor_list, enforce_sorted=False)
     traj_padded, _ = nn.utils.rnn.pad_packed_sequence(
         traj_packed, batch_first=True, padding_value=-1)
-    
+
     traj_padded = traj_padded.to(device)
 
     return traj_padded, seq_len_list
 
 
 if __name__ == "__main__":
-    traj_padded, _ = main()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    traj_padded, _ = main(device=device)
     print(traj_padded.size())
 
     for i in range(3):
