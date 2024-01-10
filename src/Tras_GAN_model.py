@@ -10,6 +10,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_packed_sequence
+import numpy as np
+import geohash
 
 torch.manual_seed(1)
 
@@ -94,20 +96,21 @@ class generator_encoder(nn.Module):
 
         x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
 
-        return x # [B, L, H], H is hiden
+        return x  # [B, L, H], H is hiden
 
 
 class generator_decoder(nn.Module):
     def __init__(self):
         super(generator_decoder, self).__init__()
         each_hidden_dim = 128
-        hidden_dim = 128
+        hidden_dim = each_hidden_dim * 4
 
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=each_hidden_dim * 4, nhead=4, batch_first=True
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
 
+        self.fc_latlon_geohash = nn.Linear(hidden_dim, 8 * 5)
         self.fc_latlon = nn.Linear(hidden_dim, 2)
         self.fc_day = nn.Linear(hidden_dim, 7)
         self.fc_hour = nn.Linear(hidden_dim, 24)
@@ -116,23 +119,25 @@ class generator_decoder(nn.Module):
     def forward(self, x, mask):
         x = self.transformer_encoder(x, src_key_padding_mask=mask)
 
+        lat_lon_geohash = self.fc_latlon_geohash(x)
+        lat_lon_geohash = nn.Sigmoid()(lat_lon_geohash)
+
         lat_lon = self.fc_latlon(x)
         day = self.fc_day(x)
         hour = self.fc_hour(x)
         category = self.fc_category(x)
 
-        return lat_lon, day, hour, category
+        return lat_lon_geohash, lat_lon, day, hour, category
 
 
-        
 class generator(nn.Module):
     def __init__(self, encoder, decoder):
         super(generator, self).__init__()
         self.encoder = encoder
         self.decoder = decoder
 
-    def forward(self, x):
-        h = self.encoder(x)
-        lat_lon, day, hour, category = self.decoder(h)
+    def forward(self, x, mask):
+        h = self.encoder(x, mask)
+        lat_lon_geohash, lat_lon, day, hour, category = self.decoder(h, mask)
 
-        return lat_lon, day, hour, category
+        return lat_lon_geohash, lat_lon, day, hour, category
