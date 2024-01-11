@@ -7,17 +7,20 @@ import geohash
 
 
 class MyDataset(Dataset):
-    def __init__(self, df, encoder_dict, int_label_encoder):
+    def __init__(self, df, encoder_dict, int_label_encoder, is_applied_geohash=False):
         super().__init__()
-        self.if_geohash = True
+        self.is_applied_geohash = is_applied_geohash
         self.df = df
 
-        df_one_hot_position = self.calculate_geohash_onehot()
-        df_one_hot_position["tid"] = df["tid"]
-        df_target = df_one_hot_position
+        if self.is_applied_geohash:
+            df_one_hot_position = self.calculate_geohash_onehot()
+            df_one_hot_position["tid"] = df["tid"]
+            df_target = df_one_hot_position
+        else:
+            df_target = df[["tid", "lat", "lon"]]
 
         for col in ["day", "category", "hour"]:
-            _encoder = encoder_dict[col]
+            _encoder = encoder_dict[col]            
             onehot_df = convert_onehot(df=df, encoder=_encoder, col_name=col)
             df_target = pd.concat([df_target, onehot_df], axis=1)
 

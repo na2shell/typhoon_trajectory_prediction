@@ -20,7 +20,7 @@ def time_collate_fn(batch):
 
 # it is hard to learn the hashed position for generator
 # thus I convert actual latlon to geohash just before feeding it into discriminator
-def convert_latlon_to_geohash(batched_onehot_position_array, precision=8):
+def convert_latlon_to_geohash(batched_position_array, precision=8):
     precision = 8
 
     base32 = [
@@ -61,31 +61,24 @@ def convert_latlon_to_geohash(batched_onehot_position_array, precision=8):
         np.asarray(list("{0:05b}".format(x, "b")), dtype=int)
         for x in range(0, len(base32))
     ]
-    binary_str = [
-        "".join(map(str, one_hot_encoded_val.tolist()))
-        for one_hot_encoded_val in binary
-    ]
-    Bintobase32 = dict(zip(binary_str, base32))
+    
+    base32toBin = dict(zip(base32, binary))
 
-    batch_size = batched_onehot_position_array.shape[0]
-    max_traj_len = batched_onehot_position_array.shape[1]
-    actual_latlon_dim = 2
-    traj_actual_latlon = np.full((batch_size, max_traj_len, actual_latlon_dim), 99)
-    for i, latlon_onehot_array in enumerate(batched_onehot_position_array):
-        for j, latlon_onehot in enumerate(latlon_onehot_array):
-            latlon_onehot = list(map(int, latlon_onehot))
+    batch_size = batched_position_array.shape[0]
+    max_traj_len = batched_position_array.shape[1]
+    onehot_latlon_dim = precision * 5
+    traj_actual_latlon = np.full((batch_size, max_traj_len, onehot_latlon_dim), 99)
 
-            if 99 in latlon_onehot:
+    for i, latlon_array in enumerate(batched_position_array):
+        for j, latlon in enumerate(latlon_array):
+            if 99 in latlon:
                 break
 
-            geo_code_str = ""
-            for p in range(precision):
-                one_character_list = latlon_onehot[p * 5 : (p + 1) * 5]
-                one_character_bin = "".join(map(str, one_character_list))
-                geo_code_str += Bintobase32[one_character_bin]
-
-            actual_latlon = list(geohash.decode(geo_code_str))
-            traj_actual_latlon[i, j] = actual_latlon
+            geo_code = geohash.encode(latlon[0], latlon[1], precision)
+            geo_code_array = np.concatenate([base32toBin[x] for x in geo_code])
+            traj_actual_latlon[i, j] = geo_code_array
+    
+    traj_actual_latlon = torch.tensor(traj_actual_latlon).to(torch.float)
 
     return traj_actual_latlon
 
@@ -136,8 +129,8 @@ def reverse_geohash_onehot_to_actual(batched_onehot_position_array, precision=8)
     ]
     Bintobase32 = dict(zip(binary_str, base32))
 
-    batch_size = batched_onehot_position_array.shape[0]
-    max_traj_len = batched_onehot_position_array.shape[1]
+    batch_size = batched_onehot_position_array.size(0)
+    max_traj_len = batched_onehot_position_array.size(1)
     actual_latlon_dim = 2
     traj_actual_latlon = np.full((batch_size, max_traj_len, actual_latlon_dim), 99)
     for i, latlon_onehot_array in enumerate(batched_onehot_position_array):

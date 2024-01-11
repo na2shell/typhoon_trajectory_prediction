@@ -12,6 +12,12 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_packed_sequence
 import numpy as np
 import geohash
+from utils import convert_latlon_to_geohash
+import math
+
+import torch
+from torch import nn, Tensor
+from utils_for_seq2seq import PositionalEncoding
 
 torch.manual_seed(1)
 
@@ -22,17 +28,18 @@ class discriminator(nn.Module):
         self.precision = 8
         each_hidden_dim = 128
 
-        self.postion_last_index = 5 * self.precision
+        self.postion_last_index = 2
         self.day_last_index = self.postion_last_index + 7
         self.category_last_index = self.day_last_index + 10
 
-        self.latlon_embbedding = nn.Linear(5 * self.precision, each_hidden_dim)
+        self.latlon_embbedding = nn.Linear(2, each_hidden_dim)
         self.day_embbedding = nn.Linear(7, each_hidden_dim)
         self.hour_embbedding = nn.Linear(24, each_hidden_dim)
         self.category_embbedding = nn.Linear(10, each_hidden_dim)
 
         self.dense = nn.Linear(each_hidden_dim, hidden_dim)
 
+        self.pos_encoder = PositionalEncoding(d_model=each_hidden_dim * 4, dropout=0.5)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=each_hidden_dim * 4, nhead=4, batch_first=True
         )
@@ -52,6 +59,7 @@ class discriminator(nn.Module):
 
         embedding_all = torch.cat([latlon_e, day_e, category_e, hour_e], dim=2)
 
+        embedding_all = self.pos_encoder(embedding_all)
         x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
         x = torch.mean(x, dim=1)
         x = self.output_layer(x)
@@ -60,20 +68,22 @@ class discriminator(nn.Module):
 
 
 class generator_encoder(nn.Module):
-    def __init__(self, hidden_dim):
+    def __init__(self, hidden_dim, mean=0, std=0):
         super(generator_encoder, self).__init__()
 
         self.precision = 8
         each_hidden_dim = 128
 
-        self.postion_last_index = 5 * self.precision
+        self.postion_last_index = 2
         self.day_last_index = self.postion_last_index + 7
         self.category_last_index = self.day_last_index + 10
 
-        self.latlon_embbedding = nn.Linear(5 * self.precision, each_hidden_dim)
+        self.latlon_embbedding = nn.Linear(2, each_hidden_dim)
         self.day_embbedding = nn.Linear(7, each_hidden_dim)
         self.hour_embbedding = nn.Linear(24, each_hidden_dim)
         self.category_embbedding = nn.Linear(10, each_hidden_dim)
+
+        self.pos_encoder = PositionalEncoding(d_model=each_hidden_dim * 4, dropout=0.5)
 
         self.dense = nn.Linear(each_hidden_dim, hidden_dim)
 
@@ -94,6 +104,7 @@ class generator_encoder(nn.Module):
 
         embedding_all = torch.cat([latlon_e, day_e, category_e, hour_e], dim=2)
 
+        embedding_all = self.pos_encoder(embedding_all)
         x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
 
         return x  # [B, L, H], H is hiden
@@ -105,29 +116,27 @@ class generator_decoder(nn.Module):
         each_hidden_dim = 128
         hidden_dim = each_hidden_dim * 4
 
+        self.pos_encoder = PositionalEncoding(d_model=each_hidden_dim * 4, dropout=0.5)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=each_hidden_dim * 4, nhead=4, batch_first=True
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
 
-        self.fc_latlon_geohash = nn.Linear(hidden_dim, 8 * 5)
+        # self.fc_latlon_geohash = nn.Linear(hidden_dim, 8 * 5)
         self.fc_latlon = nn.Linear(hidden_dim, 2)
         self.fc_day = nn.Linear(hidden_dim, 7)
         self.fc_hour = nn.Linear(hidden_dim, 24)
         self.fc_category = nn.Linear(hidden_dim, 10)
 
     def forward(self, x, mask):
+        x = self.pos_encoder(x)
         x = self.transformer_encoder(x, src_key_padding_mask=mask)
-
-        lat_lon_geohash = self.fc_latlon_geohash(x)
-        lat_lon_geohash = nn.Sigmoid()(lat_lon_geohash)
-
         lat_lon = self.fc_latlon(x)
         day = self.fc_day(x)
         hour = self.fc_hour(x)
         category = self.fc_category(x)
 
-        return lat_lon_geohash, lat_lon, day, hour, category
+        return lat_lon, day, hour, category
 
 
 class generator(nn.Module):
@@ -138,6 +147,9 @@ class generator(nn.Module):
 
     def forward(self, x, mask):
         h = self.encoder(x, mask)
-        lat_lon_geohash, lat_lon, day, hour, category = self.decoder(h, mask)
+        lat_lon, day, hour, category = self.decoder(h, mask)
 
-        return lat_lon_geohash, lat_lon, day, hour, category
+        return lat_lon, day, hour, category
+
+
+
