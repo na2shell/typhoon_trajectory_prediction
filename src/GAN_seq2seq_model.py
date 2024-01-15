@@ -1,7 +1,7 @@
 from torch import Tensor
 import torch
 import torch.nn as nn
-from torch.nn import Transformer
+from torch.nn import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 import math
 from utils_for_seq2seq import PositionalEncoding
 
@@ -20,6 +20,7 @@ class Traj_Embedding(nn.Module):
         self.category_last_index = self.day_last_index + 10
 
     def forward(self, x):
+        # print("input x size:", x.size())
         latlon_e = self.latlon_embbedding(x[:, :, : self.postion_last_index])
         day_e = self.day_embbedding(
             x[:, :, self.postion_last_index : self.postion_last_index + 7]
@@ -34,6 +35,45 @@ class Traj_Embedding(nn.Module):
         return embedding_all
 
 
+class re_converter(nn.Module):
+    def __init__(self, emb_size):
+        super(re_converter, self).__init__()
+        self.fc_latlon = nn.Linear(emb_size, 2)
+        self.fc_day = nn.Linear(emb_size, 7)
+        self.fc_hour = nn.Linear(emb_size, 24)
+        self.fc_category = nn.Linear(emb_size, 10)
+
+    def forward(self, outs):
+        lat_lon = self.fc_latlon(outs)
+        day = self.fc_day(outs)
+        hour = self.fc_hour(outs)
+        category = self.fc_category(outs)
+
+        return lat_lon, day, hour, category
+
+
+class My_encoder(nn.Module):
+    def __init__(self, d_model, nhead, num_encoder_layers, DEVICE):
+        super(My_encoder, self).__init__()
+
+        encoder_layer = TransformerEncoderLayer(d_model, nhead, batch_first=True)
+        encoder_norm = LayerNorm(d_model)
+        self.encoder = TransformerEncoder(
+            encoder_layer, num_encoder_layers, encoder_norm
+        )
+        self.DEVICE = DEVICE
+
+    def forward(self, src, mask=None, src_key_padding_mask=None, is_causal=None):
+        memory = self.encoder(src, mask, src_key_padding_mask, is_causal)
+        noise = torch.randn(memory.size()).to(self.DEVICE)
+        _memory = memory + noise
+
+        x = torch.mean(memory, dim=1)
+        x = x.view(x.size(0), 1, x.size(1))
+
+        return memory
+
+
 class Seq2SeqTransformer(nn.Module):
     def __init__(
         self,
@@ -43,9 +83,14 @@ class Seq2SeqTransformer(nn.Module):
         nhead: int,
         dim_feedforward: int = 512,
         dropout: float = 0.1,
+        DEVICE: str = "cpu"
     ):
         super(Seq2SeqTransformer, self).__init__()
         emb_size = 4 * each_emb_size
+
+        noised_encoder = My_encoder(
+            d_model=emb_size, nhead=nhead, num_encoder_layers=num_encoder_layers, DEVICE=DEVICE
+        )
         self.transformer = Transformer(
             d_model=emb_size,
             nhead=nhead,
@@ -53,18 +98,15 @@ class Seq2SeqTransformer(nn.Module):
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
-            batch_first=True
+            batch_first=True,
+            custom_encoder=noised_encoder,
         )
 
         self.src_emb = Traj_Embedding(emb_size=each_emb_size)
         self.tgt_emb = Traj_Embedding(emb_size=each_emb_size)
 
         self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
-
-        self.fc_latlon = nn.Linear(emb_size, 2)
-        self.fc_day = nn.Linear(emb_size, 7)
-        self.fc_hour = nn.Linear(emb_size, 24)
-        self.fc_category = nn.Linear(emb_size, 10)
+        self.re_converter = re_converter(emb_size=emb_size)
 
     def forward(
         self,
@@ -77,7 +119,7 @@ class Seq2SeqTransformer(nn.Module):
         memory_key_padding_mask: Tensor,
     ):
         src_emb = self.positional_encoding(self.src_emb(src))
-        tgt_emb = self.positional_encoding(self.tgt_emb(trg))
+        tgt_emb = self.positional_encoding(self.src_emb(trg))
 
         outs = self.transformer(
             src_emb,
@@ -87,15 +129,12 @@ class Seq2SeqTransformer(nn.Module):
             None,
             src_padding_mask,
             tgt_padding_mask,
-            memory_key_padding_mask
+            None,
         )
 
         # reverse => day, latlon, category, hour
 
-        lat_lon = self.fc_latlon(outs)
-        day = self.fc_day(outs)
-        hour = self.fc_hour(outs)
-        category = self.fc_category(outs)
+        lat_lon, day, hour, category = self.re_converter(outs)
 
         return lat_lon, day, hour, category
 
@@ -105,6 +144,7 @@ class Seq2SeqTransformer(nn.Module):
         )
 
     def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
+        print("decode seq input", tgt[0, :, :2])
         return self.transformer.decoder(
-            self.positional_encoding(self.tgt_emb(tgt)), memory, tgt_mask
+            self.positional_encoding(self.tgt_emb(tgt)), memory
         )

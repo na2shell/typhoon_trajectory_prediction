@@ -18,17 +18,23 @@ from utils import (
     build_int_encoder,
     time_collate_fn,
 )
-from utils_for_seq2seq import create_mask, mse_loss_with_mask
+from utils_for_seq2seq import (
+    create_mask,
+    mse_loss_with_mask,
+    generate_square_subsequent_mask,
+)
 from GAN_seq2seq_model import Seq2SeqTransformer
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-g_lr = 1e-3
+g_lr = 5e-4
 d_lr = 1e-4
-epoch_num = 50
+epoch_num = 30
 BATCH_SIZE = 128
 train = True
-latlon_corr = 100
+latlon_corr = 10
+bce_loss_corr = 0
+
 bce_loss = nn.BCELoss()
 ce_loss = nn.CrossEntropyLoss(ignore_index=111)
 mean = 0
@@ -40,13 +46,18 @@ std = 0
 ge = generator_encoder(hidden_dim=128)
 gd = generator_decoder()
 
-G = generator(encoder=ge, decoder=gd).to(DEVICE)
+G = Seq2SeqTransformer(
+    num_encoder_layers=2,
+    num_decoder_layers=2,
+    each_emb_size=64,
+    nhead=2,
+    DEVICE=DEVICE,
+)
+G = G.to(DEVICE)
 D = discriminator(input_dim=43, hidden_dim=128, output_dim=1).to(DEVICE)
 
-G_optimizer = optim.Adam(G.parameters(), lr=g_lr, betas=(0.5, 0.999))
-D_optimizer = optim.Adam(D.parameters(), lr=d_lr, betas=(0.5, 0.999))
-
-epoch_num = 20
+G_optimizer = optim.Adam(G.parameters(), lr=g_lr)
+D_optimizer = optim.Adam(D.parameters(), lr=d_lr)
 
 target_dict = {}
 target_dict["day"] = [i for i in range(7)]
@@ -75,13 +86,16 @@ dataloader = torch.utils.data.DataLoader(
     shuffle=True,
     collate_fn=time_collate_fn,
     drop_last=True,
-    num_workers=2,
+    num_workers=8,
 )
 
 
 if train:
+    G.train()
+    D.train()
     for epoch in range(epoch_num):
         g_losses = []
+        g_losses_latlon = []
         g_losses_bce = []
         d_losses = []
         for data, traj_len, traj_class_indices, label, mask in dataloader:
@@ -96,25 +110,8 @@ if train:
                 _src_for_making_mask, _tgt_input_for_making_mask, DEVICE=DEVICE
             )
 
-            G = Seq2SeqTransformer(
-                num_encoder_layers=4, num_decoder_layers=4, each_emb_size=128, nhead=4
-            )
-            G = G.to(DEVICE)
-
             real_outputs = D.forward(data.to(DEVICE), mask.to(DEVICE))
             real_label = 0.9 * torch.ones(BATCH_SIZE, 1).to(DEVICE)
-
-            noise = torch.tensor(
-                np.random.normal(mean, std, data.size()), dtype=torch.float
-            ).to(DEVICE)
-
-            noise_data = data + noise
-            # noise_data = data
-            # fake_input = G(noise_data)
-
-            print(
-                data.device, tgt_input.device, src_mask.device, src_padding_mask.device
-            )
 
             lat_lon, day, hour, category = G(
                 data,
@@ -123,35 +120,10 @@ if train:
                 tgt_mask,
                 src_padding_mask,
                 tgt_padding_mask,
-                src_padding_mask,
+                None,
             )
 
-            print(lat_lon.size(), day.size(), hour.size(), category.size())
-            # print(lat_lon)
-
-            day_onehot = torch.nn.functional.one_hot(
-                torch.argmax(day, dim=2), num_classes=7
-            )
-            hour_onehot = torch.nn.functional.one_hot(
-                torch.argmax(hour, dim=2), num_classes=24
-            )
-            category_onehot = torch.nn.functional.one_hot(
-                torch.argmax(category, dim=2), num_classes=10
-            )
-
-            _fake_inputs = torch.cat(
-                [lat_lon, day_onehot, hour_onehot, category_onehot], dim=-1
-            )
-
-            # # fake_input = lat_lon
-
-            # fake_input = fake_input.detach()
-            # packed_fake_input = torch.nn.utils.rnn.pack_padded_sequence(
-            #     fake_input, batch_first=True, lengths=traj_len, enforce_sorted=False)
-
-            # # print(fake_input.size())
-
-            # last_pos = data.size(1)
+            _fake_inputs = torch.cat([lat_lon, day, hour, category], dim=-1)
 
             fake_out = D(_fake_inputs, src_padding_mask[:, 1:])
             fake_label = torch.zeros(BATCH_SIZE, 1).to(DEVICE)
@@ -170,11 +142,6 @@ if train:
             d_losses.append(D_loss.item())
 
             # --- Generator ------
-            noise = torch.tensor(
-                np.random.normal(mean, std, data.size()), dtype=torch.float
-            ).to(DEVICE)
-            noise_data = data + noise
-            noise_data = data
 
             lat_lon, day, hour, category = G(
                 data,
@@ -183,22 +150,10 @@ if train:
                 tgt_mask,
                 src_padding_mask,
                 tgt_padding_mask,
-                src_padding_mask,
+                None,
             )
 
-            day_onehot = torch.nn.functional.one_hot(
-                torch.argmax(day, dim=2), num_classes=7
-            )
-            hour_onehot = torch.nn.functional.one_hot(
-                torch.argmax(hour, dim=2), num_classes=24
-            )
-            category_onehot = torch.nn.functional.one_hot(
-                torch.argmax(category, dim=2), num_classes=10
-            )
-
-            fake_inputs = torch.cat(
-                [lat_lon, day_onehot, hour_onehot, category_onehot], dim=-1
-            )
+            fake_inputs = torch.cat([lat_lon, day, hour, category], dim=-1)
             # fake_inputs = lat_lon
 
             # lat, lng, day, hour, category = G(noise_data)
@@ -242,49 +197,145 @@ if train:
             )
 
             G_loss = (
-                G_loss_GAN
+                bce_loss_corr*G_loss_GAN
                 + latlon_corr * G_loss_equation
                 + day_loss
                 + category_loss
                 + hour_loss
             )
 
+            # G_loss = latlon_corr * G_loss_equation 
+
+            # G_loss = G_loss_GAN
+
             # print("G_loss", G_loss)
             G_optimizer.zero_grad()
             G_loss.backward()
             G_optimizer.step()
+
             g_losses.append(G_loss.item())
+            g_losses_latlon.append(G_loss_equation.item())
 
         print(
-            "epoch: {} \n G loss sum: {:.3f} G bce loss: {:.3f} D loss: {:.3f}".format(
+            "epoch: {} \n G loss sum: {:.3f} G bce loss: {:.3f} G lat lon loss: {:.3f} D loss: {:.3f}".format(
                 epoch,
                 sum(g_losses) / len(g_losses),
                 sum(g_losses_bce) / len(g_losses_bce),
+                sum(g_losses_latlon) / len(g_losses_latlon),
                 sum(d_losses) / len(d_losses),
             )
         )
 
+    print(data[0, :, 0])
+    print(fake_inputs[0, :, 0])
     print("finish learning")
-    torch.save(G.state_dict(), "generator.pt")
+    torch.save(G.state_dict(), "generator_n.pt")
 
 
-G.load_state_dict(torch.load("generator.pt"))
-G.eval()
+G_runtime = Seq2SeqTransformer(
+    num_encoder_layers=2, num_decoder_layers=2, each_emb_size=64, nhead=2, DEVICE=DEVICE
+)
+G_runtime = G_runtime.to(DEVICE)
+G_runtime.load_state_dict(torch.load("generator_n.pt"))
+G_runtime.eval()
 
-for i in range(20, 23):
-    data, traj_len, traj_class_indices, label = train_data_set[i]
+params_G = G.state_dict()
+params_G_runtime = G_runtime.state_dict()
 
+if train:
+    for key in params_G.keys():
+        assert torch.equal(params_G[key], params_G_runtime[key])
+
+    print("all model weight is same")
+
+TEST_BATCH_SIZE = 1
+
+test_dataloader = torch.utils.data.DataLoader(
+    dataset=train_data_set,
+    batch_size=TEST_BATCH_SIZE,
+    shuffle=True,
+    collate_fn=time_collate_fn,
+    drop_last=True,
+    num_workers=2,
+)
+
+for data, traj_len, traj_class_indices, label, mask in test_dataloader:
     data = data.to(DEVICE)
-    noise = torch.tensor(
-        np.random.normal(mean, std, data.size()), dtype=torch.float
-    ).to(DEVICE)
-    noised_traj = data + noise
-    noised_traj = noised_traj.view(1, noised_traj.size(0), noised_traj.size(1))
-    mask = torch.zeros(noised_traj.size(0), noised_traj.size(1)).to(DEVICE)
-    lat_lon, day, hour, category = G.forward(noised_traj, mask)
+    mask = mask.to(DEVICE)
+
+    tgt_input = data[:, :-1, :]
+    _src_for_making_mask = data[:, :, 0]
+    _tgt_input_for_making_mask = _src_for_making_mask[:, :-1]
+
+    src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(
+        _src_for_making_mask, _tgt_input_for_making_mask, DEVICE=DEVICE
+    )
+
+    lat_lon, day, hour, category = G_runtime(
+        data,
+        tgt_input,
+        src_mask,
+        tgt_mask,
+        src_padding_mask,
+        tgt_padding_mask,
+        None,
+    )
+
+    print(data[:, :, :2], tgt_input)
+    lat_lon = lat_lon.squeeze()
+    print(lat_lon)
+    break
+
+    memory = G_runtime.encode(data, src_mask)
+    max_len = data.size(1)
+
+    ys = data[:, :2, :]
+    for i in range(max_len - 1):
+        memory = memory.to(DEVICE)
+        tgt_mask = (
+            generate_square_subsequent_mask(ys.size(1), DEVICE).type(torch.bool)
+        ).to(DEVICE)
+        tgt_mask = None
+
+        next_point_emb = G_runtime.decode(ys, memory, tgt_mask)
+        print("out emb", next_point_emb[:, :, :2])
+        lat_lon, day, hour, category = G_runtime.re_converter(next_point_emb[:, -1:, :])
+
+        next_point = torch.cat([lat_lon, day, hour, category], dim=-1)
+        ys = torch.cat([ys, next_point], dim=1)
+
+    print(data[:, :, :2], ys[:, :, :2])
+    print("memory", memory[:, :, :2])
+
+    lat_lon = ys[:, :, :2].squeeze()
+    break
+
+# for i in range(20, 23):
+#     data, traj_len, traj_class_indices, label = train_data_set[i]
+
+#     data = data.view(1, data.size(0), data.size(1)).to(DEVICE)
+
+#     tgt_input = data[:, :-1, :]
+#     _src_for_making_mask = data[:, :, 0]
+#     _tgt_input_for_making_mask = _src_for_making_mask[:, :-1]
+
+#     src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(
+#         _src_for_making_mask, _tgt_input_for_making_mask, DEVICE=DEVICE
+#     )
+
+#     lat_lon, day, hour, category = G_runtime(
+#         data,
+#         tgt_input,
+#         src_mask,
+#         tgt_mask,
+#         src_padding_mask,
+#         tgt_padding_mask,
+#         src_padding_mask,
+#     )
+#     print(data[:, :, :2], tgt_input)
+#     print(lat_lon)
 
 
-lat_lon = lat_lon.squeeze()
 traj = data.squeeze()
 
 pred_y = lat_lon.to("cpu").detach().numpy().copy()
