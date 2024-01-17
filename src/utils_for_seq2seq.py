@@ -5,6 +5,7 @@ import torch.nn as nn
 from torch.nn import Transformer
 import math
 
+
 def generate_square_subsequent_mask(sz, DEVICE):
     mask = (torch.triu(torch.ones((sz, sz), device=DEVICE)) == 1).transpose(0, 1)
     mask = (
@@ -27,9 +28,10 @@ def create_mask(src, tgt, DEVICE):
     # tgt_padding_mask = (tgt == PAD_IDX).transpose(0, 1)
 
     src_padding_mask = (src == PAD_IDX).type(torch.bool)
-    tgt_padding_mask = (tgt == PAD_IDX)
+    tgt_padding_mask = tgt == PAD_IDX
 
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
@@ -40,7 +42,7 @@ class PositionalEncoding(nn.Module):
         div_term = torch.exp(
             torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model)
         )
-        pe = torch.zeros(1, max_len, d_model) # [batch_size, seq_len, embedding_dim]
+        pe = torch.zeros(1, max_len, d_model)  # [batch_size, seq_len, embedding_dim]
         pe[0, :, 0::2] = torch.sin(position * div_term)
         pe[0, :, 1::2] = torch.cos(position * div_term)
         self.register_buffer("pe", pe)
@@ -52,7 +54,8 @@ class PositionalEncoding(nn.Module):
         """
         x = x + self.pe[:, : x.size(1), :]
         return self.dropout(x)
-    
+
+
 def mse_loss_with_mask(input, target, ignored_index, reduction="mean"):
     mask = target == ignored_index
     out = (input[~mask] - target[~mask]) ** 2
@@ -60,3 +63,14 @@ def mse_loss_with_mask(input, target, ignored_index, reduction="mean"):
         return out.mean()
     elif reduction == "None":
         return out
+
+
+def hinge_loss(logits, batch_size, condition, DEVICE):
+    if condition == "gen":
+        return -torch.mean(logits)
+    elif condition == "for_real":
+        minval = torch.min(logits - 1, torch.zeros(batch_size).to(DEVICE))
+        return -torch.mean(minval)
+    else:
+        minval = torch.min(-logits - 1, torch.zeros(batch_size).to(DEVICE))
+        return -torch.mean(minval)

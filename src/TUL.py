@@ -112,12 +112,15 @@ if __name__ == "__main__":
     print(int_label_encoder.classes_)
 
     train_data_set = MyDataset(
-        df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder)
+        df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder, is_applied_geohash=True)
+    
 
-    data_path = "./dev_test_encoded_final.csv"
+    data_path = "./k-same-net_generated_traj.csv"
     df = pd.read_csv(data_path)
+    df["label"] = int_label_encoder.inverse_transform(df["uid"])
+
     test_data_set = MyDataset(
-        df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder)
+        df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder, is_applied_geohash=True)
 
     train_dataloader = torch.utils.data.DataLoader(dataset=train_data_set,
                                                    batch_size=BATCH_SIZE,

@@ -1,16 +1,10 @@
-from Tras_GAN_model import (
-    generator,
-    discriminator,
-    generator_decoder,
-    generator_encoder,
-)
-import numpy as np
 import torch
 from torch import nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import pandas as pd
 from traj_Dataset import MyDataset
+from Tras_GAN_model import discriminator
 from utils import (
     convert_onehot,
     convert_label_to_inger,
@@ -22,29 +16,32 @@ from utils_for_seq2seq import (
     create_mask,
     mse_loss_with_mask,
     generate_square_subsequent_mask,
+    hinge_loss
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
 
 
+import argparse
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument("--train", action='store_true')
+
+args = parser.parse_args()
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 g_lr = 5e-4
 d_lr = 1e-4
-epoch_num = 30
-BATCH_SIZE = 128
-train = True
+epoch_num = 100
+BATCH_SIZE = 64
+train = args.train
 latlon_corr = 10
-bce_loss_corr = 0
+bce_loss_corr = 1
 
-bce_loss = nn.BCELoss()
+bce_loss = nn.BCEWithLogitsLoss()
 ce_loss = nn.CrossEntropyLoss(ignore_index=111)
 mean = 0
 std = 0
 
-# mse_loss = nn.MSELoss()
-
-
-ge = generator_encoder(hidden_dim=128)
-gd = generator_decoder()
 
 G = Seq2SeqTransformer(
     num_encoder_layers=2,
@@ -126,14 +123,17 @@ if train:
             _fake_inputs = torch.cat([lat_lon, day, hour, category], dim=-1)
 
             fake_out = D(_fake_inputs, src_padding_mask[:, 1:])
-            fake_label = torch.zeros(BATCH_SIZE, 1).to(DEVICE)
+            fake_label = 0.1*torch.ones(BATCH_SIZE, 1).to(DEVICE)
 
-            # print(real_outputs.size(), fake_out.size())
+            
             outputs = torch.cat((real_outputs, fake_out), 0)
             targets = torch.cat((real_label, fake_label), 0)
-
-            # print(outputs.size(), targets.size())
             D_loss = bce_loss(outputs, targets)
+
+            # D_loss_real = hinge_loss(real_outputs, BATCH_SIZE, "for_real", DEVICE)
+            # D_loss_fake = hinge_loss(fake_out, BATCH_SIZE, "for_fake", DEVICE)
+            # D_loss = D_loss_real + D_loss_fake
+
             # print("D_loss", D_loss)
             D_optimizer.zero_grad()
             D_loss.backward()
@@ -167,6 +167,8 @@ if train:
             # print(fake_outputs.size(), fake_targets.size(),  fake_targets)
 
             G_loss_GAN = bce_loss(fake_outputs, fake_targets)
+            # G_loss_GAN = hinge_loss(fake_outputs, BATCH_SIZE, "gen", DEVICE)
+
             g_losses_bce.append(G_loss_GAN.item())
 
             G_loss_equation = torch.sqrt(
@@ -271,23 +273,29 @@ for data, traj_len, traj_class_indices, label, mask in test_dataloader:
         _src_for_making_mask, _tgt_input_for_making_mask, DEVICE=DEVICE
     )
 
-    lat_lon, day, hour, category = G_runtime(
-        data,
-        tgt_input,
-        src_mask,
-        tgt_mask,
-        src_padding_mask,
-        tgt_padding_mask,
-        None,
-    )
+    # lat_lon, day, hour, category = G_runtime(
+    #     data,
+    #     tgt_input,
+    #     src_mask,
+    #     tgt_mask,
+    #     src_padding_mask,
+    #     tgt_padding_mask,
+    #     None,
+    # )
 
-    print(data[:, :, :2], tgt_input)
-    lat_lon = lat_lon.squeeze()
-    print(lat_lon)
-    break
+    # print(data[:, :, :2], tgt_input)
+    # lat_lon = lat_lon.squeeze()
+    # print(lat_lon)
+    # break
 
     memory = G_runtime.encode(data, src_mask)
     max_len = data.size(1)
+
+    gen_traj_emb = G_runtime.decode(tgt_input, memory, tgt_mask)
+    lat_lon, day, hour, category = G_runtime.re_converter(gen_traj_emb)
+    lat_lon = lat_lon.squeeze()
+    print(lat_lon)
+    break
 
     ys = data[:, :2, :]
     for i in range(max_len - 1):

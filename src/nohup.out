@@ -1,0 +1,592 @@
+[   6    7   12   14   19   25   34   50   56   65   69   70   73   80
+   81   82   84   90   91   94   95   99  119  120  121  138  144  150
+  153  154  164  171  172  178  181  182  184  185  187  188  201  207
+  208  236  246  254  262  267  280  293  295  315  319  343  344  347
+  349  354  355  359  365  371  372  384  386  390  396  398  412  422
+  425  432  438  439  440  443  445  448  458  461  472  474  475  484
+  488  492  495  509  518  519  521  527  529  531  533  539  546  553
+  572  579  582  585  589  593  595  596  612  617  621  628  635  638
+  642  643  645  646  647  649  652  660  662  673  682  688  689  699
+  702  705  706  708  718  722  723  730  734  742  744  745  750  752
+  753  754  763  766  767  768  773  787  806  816  819  820  827  834
+  842  857  868  872  877  881  882  885  889  891  895  900  901  902
+  913  916  922  928  934  943  951  974  976  980  988  990  992 1006
+ 1016 1017 1019 1025 1029 1040 1044 1047 1054 1055 1070]
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:457: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:457: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:457: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+epoch: 0 
+ G loss sum: 15.119 G bce loss: 2.260 G lat lon loss: 0.496 D loss: 0.433
+/usr/local/lib/python3.8/dist-packages/torch/nn/functional.py:4999: UserWarning: Support for mismatched key_padding_mask and attn_mask is deprecated. Use same type for both instead.
+  warnings.warn(
+epoch: 1 
+ G loss sum: 14.184 G bce loss: 2.136 G lat lon loss: 0.432 D loss: 0.351
+epoch: 2 
+ G loss sum: 13.513 G bce loss: 1.868 G lat lon loss: 0.405 D loss: 0.351
+epoch: 3 
+ G loss sum: 13.569 G bce loss: 2.246 G lat lon loss: 0.383 D loss: 0.341
+epoch: 4 
+ G loss sum: 13.240 G bce loss: 2.134 G lat lon loss: 0.368 D loss: 0.338
+epoch: 5 
+ G loss sum: 13.130 G bce loss: 2.200 G lat lon loss: 0.353 D loss: 0.344
+epoch: 6 
+ G loss sum: 12.964 G bce loss: 2.147 G lat lon loss: 0.340 D loss: 0.340
+epoch: 7 
+ G loss sum: 12.973 G bce loss: 2.200 G lat lon loss: 0.330 D loss: 0.343
+epoch: 8 
+ G loss sum: 12.794 G bce loss: 2.056 G lat lon loss: 0.321 D loss: 0.337
+epoch: 9 
+ G loss sum: 12.843 G bce loss: 2.155 G lat lon loss: 0.313 D loss: 0.335
+epoch: 10 
+ G loss sum: 12.684 G bce loss: 2.056 G lat lon loss: 0.305 D loss: 0.331
+epoch: 11 
+ G loss sum: 12.648 G bce loss: 2.081 G lat lon loss: 0.298 D loss: 0.333
+epoch: 12 
+ G loss sum: 12.670 G bce loss: 2.164 G lat lon loss: 0.292 D loss: 0.331
+epoch: 13 
+ G loss sum: 12.594 G bce loss: 2.132 G lat lon loss: 0.287 D loss: 0.333
+epoch: 14 
+ G loss sum: 12.513 G bce loss: 2.083 G lat lon loss: 0.283 D loss: 0.334
+epoch: 15 
+ G loss sum: 12.513 G bce loss: 2.116 G lat lon loss: 0.279 D loss: 0.332
+epoch: 16 
+ G loss sum: 12.523 G bce loss: 2.164 G lat lon loss: 0.276 D loss: 0.332
+epoch: 17 
+ G loss sum: 12.325 G bce loss: 2.012 G lat lon loss: 0.272 D loss: 0.332
+epoch: 18 
+ G loss sum: 12.468 G bce loss: 2.201 G lat lon loss: 0.269 D loss: 0.334
+epoch: 19 
+ G loss sum: 12.213 G bce loss: 1.989 G lat lon loss: 0.267 D loss: 0.333
+epoch: 20 
+ G loss sum: 12.283 G bce loss: 2.118 G lat lon loss: 0.264 D loss: 0.333
+epoch: 21 
+ G loss sum: 12.247 G bce loss: 2.145 G lat lon loss: 0.262 D loss: 0.332
+epoch: 22 
+ G loss sum: 12.039 G bce loss: 2.003 G lat lon loss: 0.259 D loss: 0.331
+epoch: 23 
+ G loss sum: 12.119 G bce loss: 2.152 G lat lon loss: 0.257 D loss: 0.331
+epoch: 24 
+ G loss sum: 11.903 G bce loss: 2.004 G lat lon loss: 0.253 D loss: 0.331
+epoch: 25 
+ G loss sum: 11.961 G bce loss: 2.111 G lat lon loss: 0.251 D loss: 0.330
+epoch: 26 
+ G loss sum: 11.963 G bce loss: 2.169 G lat lon loss: 0.248 D loss: 0.328
+epoch: 27 
+ G loss sum: 11.802 G bce loss: 2.036 G lat lon loss: 0.246 D loss: 0.328
+epoch: 28 
+ G loss sum: 11.815 G bce loss: 2.089 G lat lon loss: 0.244 D loss: 0.329
+epoch: 29 
+ G loss sum: 11.746 G bce loss: 2.055 G lat lon loss: 0.241 D loss: 0.329
+epoch: 30 
+ G loss sum: 11.738 G bce loss: 2.062 G lat lon loss: 0.240 D loss: 0.329
+epoch: 31 
+ G loss sum: 11.856 G bce loss: 2.209 G lat lon loss: 0.238 D loss: 0.329
+epoch: 32 
+ G loss sum: 11.689 G bce loss: 2.064 G lat lon loss: 0.235 D loss: 0.328
+epoch: 33 
+ G loss sum: 11.633 G bce loss: 2.022 G lat lon loss: 0.234 D loss: 0.329
+epoch: 34 
+ G loss sum: 11.706 G bce loss: 2.115 G lat lon loss: 0.232 D loss: 0.331
+epoch: 35 
+ G loss sum: 11.806 G bce loss: 2.225 G lat lon loss: 0.231 D loss: 0.329
+epoch: 36 
+ G loss sum: 11.555 G bce loss: 1.998 G lat lon loss: 0.228 D loss: 0.328
+epoch: 37 
+ G loss sum: 11.644 G bce loss: 2.121 G lat lon loss: 0.225 D loss: 0.330
+epoch: 38 
+ G loss sum: 11.603 G bce loss: 2.087 G lat lon loss: 0.225 D loss: 0.329
+epoch: 39 
+ G loss sum: 11.576 G bce loss: 2.094 G lat lon loss: 0.221 D loss: 0.328
+epoch: 40 
+ G loss sum: 11.546 G bce loss: 2.080 G lat lon loss: 0.220 D loss: 0.328
+epoch: 41 
+ G loss sum: 11.489 G bce loss: 2.063 G lat lon loss: 0.217 D loss: 0.327
+epoch: 42 
+ G loss sum: 11.506 G bce loss: 2.123 G lat lon loss: 0.213 D loss: 0.329
+epoch: 43 
+ G loss sum: 11.404 G bce loss: 2.039 G lat lon loss: 0.212 D loss: 0.327
+epoch: 44 
+ G loss sum: 11.475 G bce loss: 2.141 G lat lon loss: 0.209 D loss: 0.328
+epoch: 45 
+ G loss sum: 11.376 G bce loss: 2.052 G lat lon loss: 0.208 D loss: 0.327
+epoch: 46 
+ G loss sum: 11.400 G bce loss: 2.096 G lat lon loss: 0.206 D loss: 0.327
+epoch: 47 
+ G loss sum: 11.430 G bce loss: 2.149 G lat lon loss: 0.203 D loss: 0.328
+epoch: 48 
+ G loss sum: 11.357 G bce loss: 2.088 G lat lon loss: 0.201 D loss: 0.328
+epoch: 49 
+ G loss sum: 11.323 G bce loss: 2.052 G lat lon loss: 0.201 D loss: 0.329
+epoch: 50 
+ G loss sum: 11.357 G bce loss: 2.115 G lat lon loss: 0.197 D loss: 0.327
+epoch: 51 
+ G loss sum: 11.277 G bce loss: 2.043 G lat lon loss: 0.196 D loss: 0.327
+epoch: 52 
+ G loss sum: 11.331 G bce loss: 2.119 G lat lon loss: 0.195 D loss: 0.327
+epoch: 53 
+ G loss sum: 11.322 G bce loss: 2.125 G lat lon loss: 0.194 D loss: 0.330
+epoch: 54 
+ G loss sum: 11.248 G bce loss: 2.049 G lat lon loss: 0.194 D loss: 0.329
+epoch: 55 
+ G loss sum: 11.259 G bce loss: 2.080 G lat lon loss: 0.192 D loss: 0.328
+epoch: 56 
+ G loss sum: 11.239 G bce loss: 2.074 G lat lon loss: 0.190 D loss: 0.328
+epoch: 57 
+ G loss sum: 11.292 G bce loss: 2.152 G lat lon loss: 0.188 D loss: 0.329
+epoch: 58 
+ G loss sum: 11.189 G bce loss: 2.055 G lat lon loss: 0.188 D loss: 0.327
+epoch: 59 
+ G loss sum: 11.190 G bce loss: 2.095 G lat lon loss: 0.185 D loss: 0.327
+epoch: 60 
+ G loss sum: 11.146 G bce loss: 2.062 G lat lon loss: 0.184 D loss: 0.328
+epoch: 61 
+ G loss sum: 11.171 G bce loss: 2.100 G lat lon loss: 0.184 D loss: 0.328
+epoch: 62 
+ G loss sum: 11.133 G bce loss: 2.085 G lat lon loss: 0.182 D loss: 0.327
+epoch: 63 
+ G loss sum: 11.110 G bce loss: 2.087 G lat lon loss: 0.180 D loss: 0.327
+epoch: 64 
+ G loss sum: 11.100 G bce loss: 2.091 G lat lon loss: 0.179 D loss: 0.327
+epoch: 65 
+ G loss sum: 11.107 G bce loss: 2.118 G lat lon loss: 0.179 D loss: 0.328
+epoch: 66 
+ G loss sum: 11.021 G bce loss: 2.051 G lat lon loss: 0.177 D loss: 0.327
+epoch: 67 
+ G loss sum: 11.056 G bce loss: 2.098 G lat lon loss: 0.177 D loss: 0.327
+epoch: 68 
+ G loss sum: 11.043 G bce loss: 2.102 G lat lon loss: 0.176 D loss: 0.327
+epoch: 69 
+ G loss sum: 10.989 G bce loss: 2.054 G lat lon loss: 0.175 D loss: 0.327
+epoch: 70 
+ G loss sum: 10.988 G bce loss: 2.077 G lat lon loss: 0.173 D loss: 0.327
+epoch: 71 
+ G loss sum: 11.023 G bce loss: 2.114 G lat lon loss: 0.173 D loss: 0.327
+epoch: 72 
+ G loss sum: 11.003 G bce loss: 2.114 G lat lon loss: 0.171 D loss: 0.327
+epoch: 73 
+ G loss sum: 10.935 G bce loss: 2.050 G lat lon loss: 0.170 D loss: 0.327
+epoch: 74 
+ G loss sum: 11.049 G bce loss: 2.135 G lat lon loss: 0.173 D loss: 0.330
+epoch: 75 
+ G loss sum: 10.924 G bce loss: 2.039 G lat lon loss: 0.169 D loss: 0.328
+epoch: 76 
+ G loss sum: 10.967 G bce loss: 2.076 G lat lon loss: 0.168 D loss: 0.327
+epoch: 77 
+ G loss sum: 10.991 G bce loss: 2.123 G lat lon loss: 0.166 D loss: 0.327
+epoch: 78 
+ G loss sum: 10.926 G bce loss: 2.073 G lat lon loss: 0.164 D loss: 0.326
+epoch: 79 
+ G loss sum: 10.918 G bce loss: 2.079 G lat lon loss: 0.163 D loss: 0.327
+epoch: 80 
+ G loss sum: 10.908 G bce loss: 2.083 G lat lon loss: 0.163 D loss: 0.327
+epoch: 81 
+ G loss sum: 10.924 G bce loss: 2.109 G lat lon loss: 0.163 D loss: 0.327
+epoch: 82 
+ G loss sum: 10.855 G bce loss: 2.062 G lat lon loss: 0.162 D loss: 0.327
+epoch: 83 
+ G loss sum: 10.872 G bce loss: 2.091 G lat lon loss: 0.162 D loss: 0.328
+epoch: 84 
+ G loss sum: 10.838 G bce loss: 2.081 G lat lon loss: 0.160 D loss: 0.327
+epoch: 85 
+ G loss sum: 10.814 G bce loss: 2.080 G lat lon loss: 0.159 D loss: 0.326
+epoch: 86 
+ G loss sum: 10.806 G bce loss: 2.088 G lat lon loss: 0.158 D loss: 0.326
+epoch: 87 
+ G loss sum: 10.756 G bce loss: 2.061 G lat lon loss: 0.157 D loss: 0.327
+epoch: 88 
+ G loss sum: 10.802 G bce loss: 2.114 G lat lon loss: 0.156 D loss: 0.326
+epoch: 89 
+ G loss sum: 10.745 G bce loss: 2.075 G lat lon loss: 0.155 D loss: 0.326
+epoch: 90 
+ G loss sum: 10.760 G bce loss: 2.094 G lat lon loss: 0.155 D loss: 0.327
+epoch: 91 
+ G loss sum: 10.763 G bce loss: 2.109 G lat lon loss: 0.154 D loss: 0.326
+epoch: 92 
+ G loss sum: 10.725 G bce loss: 2.062 G lat lon loss: 0.154 D loss: 0.326
+epoch: 93 
+ G loss sum: 10.766 G bce loss: 2.108 G lat lon loss: 0.153 D loss: 0.327
+epoch: 94 
+ G loss sum: 10.737 G bce loss: 2.079 G lat lon loss: 0.153 D loss: 0.328
+epoch: 95 
+ G loss sum: 10.708 G bce loss: 2.050 G lat lon loss: 0.151 D loss: 0.328
+epoch: 96 
+ G loss sum: 10.788 G bce loss: 2.113 G lat lon loss: 0.152 D loss: 0.328
+epoch: 97 
+ G loss sum: 10.747 G bce loss: 2.072 G lat lon loss: 0.150 D loss: 0.327
+epoch: 98 
+ G loss sum: 10.785 G bce loss: 2.110 G lat lon loss: 0.150 D loss: 0.328
+epoch: 99 
+ G loss sum: 10.733 G bce loss: 2.070 G lat lon loss: 0.150 D loss: 0.328
+epoch: 100 
+ G loss sum: 10.729 G bce loss: 2.086 G lat lon loss: 0.149 D loss: 0.327
+epoch: 101 
+ G loss sum: 10.737 G bce loss: 2.102 G lat lon loss: 0.150 D loss: 0.328
+epoch: 102 
+ G loss sum: 10.686 G bce loss: 2.069 G lat lon loss: 0.149 D loss: 0.327
+epoch: 103 
+ G loss sum: 10.716 G bce loss: 2.107 G lat lon loss: 0.149 D loss: 0.327
+epoch: 104 
+ G loss sum: 10.673 G bce loss: 2.069 G lat lon loss: 0.149 D loss: 0.328
+epoch: 105 
+ G loss sum: 10.720 G bce loss: 2.112 G lat lon loss: 0.148 D loss: 0.328
+epoch: 106 
+ G loss sum: 10.728 G bce loss: 2.119 G lat lon loss: 0.147 D loss: 0.329
+epoch: 107 
+ G loss sum: 10.722 G bce loss: 2.093 G lat lon loss: 0.148 D loss: 0.329
+epoch: 108 
+ G loss sum: 10.667 G bce loss: 2.039 G lat lon loss: 0.147 D loss: 0.329
+epoch: 109 
+ G loss sum: 10.744 G bce loss: 2.119 G lat lon loss: 0.148 D loss: 0.329
+epoch: 110 
+ G loss sum: 10.674 G bce loss: 2.065 G lat lon loss: 0.147 D loss: 0.327
+epoch: 111 
+ G loss sum: 10.648 G bce loss: 2.064 G lat lon loss: 0.146 D loss: 0.327
+epoch: 112 
+ G loss sum: 10.675 G bce loss: 2.107 G lat lon loss: 0.146 D loss: 0.327
+epoch: 113 
+ G loss sum: 10.628 G bce loss: 2.083 G lat lon loss: 0.145 D loss: 0.327
+epoch: 114 
+ G loss sum: 10.603 G bce loss: 2.087 G lat lon loss: 0.143 D loss: 0.326
+epoch: 115 
+ G loss sum: 10.580 G bce loss: 2.077 G lat lon loss: 0.143 D loss: 0.326
+epoch: 116 
+ G loss sum: 10.569 G bce loss: 2.074 G lat lon loss: 0.144 D loss: 0.326
+epoch: 117 
+ G loss sum: 10.597 G bce loss: 2.104 G lat lon loss: 0.144 D loss: 0.326
+epoch: 118 
+ G loss sum: 10.577 G bce loss: 2.098 G lat lon loss: 0.143 D loss: 0.326
+epoch: 119 
+ G loss sum: 10.561 G bce loss: 2.083 G lat lon loss: 0.142 D loss: 0.326
+epoch: 120 
+ G loss sum: 10.552 G bce loss: 2.090 G lat lon loss: 0.141 D loss: 0.326
+epoch: 121 
+ G loss sum: 10.543 G bce loss: 2.087 G lat lon loss: 0.141 D loss: 0.326
+epoch: 122 
+ G loss sum: 10.541 G bce loss: 2.081 G lat lon loss: 0.141 D loss: 0.326
+epoch: 123 
+ G loss sum: 10.553 G bce loss: 2.094 G lat lon loss: 0.141 D loss: 0.326
+epoch: 124 
+ G loss sum: 10.540 G bce loss: 2.081 G lat lon loss: 0.141 D loss: 0.326
+epoch: 125 
+ G loss sum: 10.535 G bce loss: 2.093 G lat lon loss: 0.140 D loss: 0.326
+epoch: 126 
+ G loss sum: 10.518 G bce loss: 2.088 G lat lon loss: 0.139 D loss: 0.326
+epoch: 127 
+ G loss sum: 10.484 G bce loss: 2.075 G lat lon loss: 0.138 D loss: 0.326
+epoch: 128 
+ G loss sum: 10.465 G bce loss: 2.084 G lat lon loss: 0.137 D loss: 0.326
+epoch: 129 
+ G loss sum: 10.475 G bce loss: 2.091 G lat lon loss: 0.138 D loss: 0.326
+epoch: 130 
+ G loss sum: 10.449 G bce loss: 2.078 G lat lon loss: 0.137 D loss: 0.326
+epoch: 131 
+ G loss sum: 10.453 G bce loss: 2.101 G lat lon loss: 0.136 D loss: 0.326
+epoch: 132 
+ G loss sum: 10.427 G bce loss: 2.080 G lat lon loss: 0.136 D loss: 0.326
+epoch: 133 
+ G loss sum: 10.414 G bce loss: 2.084 G lat lon loss: 0.136 D loss: 0.326
+epoch: 134 
+ G loss sum: 10.424 G bce loss: 2.096 G lat lon loss: 0.136 D loss: 0.326
+epoch: 135 
+ G loss sum: 10.399 G bce loss: 2.075 G lat lon loss: 0.135 D loss: 0.326
+epoch: 136 
+ G loss sum: 10.399 G bce loss: 2.081 G lat lon loss: 0.136 D loss: 0.326
+epoch: 137 
+ G loss sum: 10.406 G bce loss: 2.090 G lat lon loss: 0.136 D loss: 0.326
+epoch: 138 
+ G loss sum: 10.376 G bce loss: 2.078 G lat lon loss: 0.135 D loss: 0.326
+epoch: 139 
+ G loss sum: 10.387 G bce loss: 2.085 G lat lon loss: 0.136 D loss: 0.326
+epoch: 140 
+ G loss sum: 10.397 G bce loss: 2.099 G lat lon loss: 0.137 D loss: 0.326
+epoch: 141 
+ G loss sum: 10.350 G bce loss: 2.081 G lat lon loss: 0.135 D loss: 0.326
+epoch: 142 
+ G loss sum: 10.316 G bce loss: 2.080 G lat lon loss: 0.132 D loss: 0.326
+epoch: 143 
+ G loss sum: 10.305 G bce loss: 2.083 G lat lon loss: 0.132 D loss: 0.326
+epoch: 144 
+ G loss sum: 10.291 G bce loss: 2.082 G lat lon loss: 0.132 D loss: 0.326
+epoch: 145 
+ G loss sum: 10.270 G bce loss: 2.084 G lat lon loss: 0.131 D loss: 0.326
+epoch: 146 
+ G loss sum: 10.268 G bce loss: 2.086 G lat lon loss: 0.132 D loss: 0.326
+epoch: 147 
+ G loss sum: 10.255 G bce loss: 2.088 G lat lon loss: 0.132 D loss: 0.325
+epoch: 148 
+ G loss sum: 10.240 G bce loss: 2.086 G lat lon loss: 0.131 D loss: 0.325
+epoch: 149 
+ G loss sum: 10.221 G bce loss: 2.081 G lat lon loss: 0.130 D loss: 0.325
+epoch: 150 
+ G loss sum: 10.214 G bce loss: 2.085 G lat lon loss: 0.130 D loss: 0.325
+epoch: 151 
+ G loss sum: 10.216 G bce loss: 2.088 G lat lon loss: 0.131 D loss: 0.325
+epoch: 152 
+ G loss sum: 10.191 G bce loss: 2.082 G lat lon loss: 0.130 D loss: 0.325
+epoch: 153 
+ G loss sum: 10.202 G bce loss: 2.086 G lat lon loss: 0.131 D loss: 0.325
+epoch: 154 
+ G loss sum: 10.194 G bce loss: 2.083 G lat lon loss: 0.131 D loss: 0.325
+epoch: 155 
+ G loss sum: 10.190 G bce loss: 2.084 G lat lon loss: 0.131 D loss: 0.325
+epoch: 156 
+ G loss sum: 10.173 G bce loss: 2.087 G lat lon loss: 0.129 D loss: 0.325
+epoch: 157 
+ G loss sum: 10.159 G bce loss: 2.085 G lat lon loss: 0.129 D loss: 0.325
+epoch: 158 
+ G loss sum: 10.146 G bce loss: 2.082 G lat lon loss: 0.129 D loss: 0.325
+epoch: 159 
+ G loss sum: 10.124 G bce loss: 2.082 G lat lon loss: 0.128 D loss: 0.325
+epoch: 160 
+ G loss sum: 10.119 G bce loss: 2.078 G lat lon loss: 0.129 D loss: 0.325
+epoch: 161 
+ G loss sum: 10.119 G bce loss: 2.081 G lat lon loss: 0.128 D loss: 0.325
+epoch: 162 
+ G loss sum: 10.110 G bce loss: 2.087 G lat lon loss: 0.128 D loss: 0.325
+epoch: 163 
+ G loss sum: 10.092 G bce loss: 2.084 G lat lon loss: 0.127 D loss: 0.325
+epoch: 164 
+ G loss sum: 10.090 G bce loss: 2.082 G lat lon loss: 0.128 D loss: 0.325
+epoch: 165 
+ G loss sum: 10.086 G bce loss: 2.084 G lat lon loss: 0.128 D loss: 0.325
+epoch: 166 
+ G loss sum: 10.087 G bce loss: 2.089 G lat lon loss: 0.128 D loss: 0.325
+epoch: 167 
+ G loss sum: 10.066 G bce loss: 2.082 G lat lon loss: 0.127 D loss: 0.325
+epoch: 168 
+ G loss sum: 10.043 G bce loss: 2.079 G lat lon loss: 0.126 D loss: 0.325
+epoch: 169 
+ G loss sum: 10.048 G bce loss: 2.087 G lat lon loss: 0.126 D loss: 0.325
+epoch: 170 
+ G loss sum: 10.036 G bce loss: 2.084 G lat lon loss: 0.127 D loss: 0.325
+epoch: 171 
+ G loss sum: 10.035 G bce loss: 2.088 G lat lon loss: 0.126 D loss: 0.325
+epoch: 172 
+ G loss sum: 10.029 G bce loss: 2.090 G lat lon loss: 0.126 D loss: 0.325
+epoch: 173 
+ G loss sum: 10.029 G bce loss: 2.091 G lat lon loss: 0.127 D loss: 0.325
+epoch: 174 
+ G loss sum: 10.009 G bce loss: 2.080 G lat lon loss: 0.127 D loss: 0.325
+epoch: 175 
+ G loss sum: 9.999 G bce loss: 2.079 G lat lon loss: 0.126 D loss: 0.325
+epoch: 176 
+ G loss sum: 9.989 G bce loss: 2.080 G lat lon loss: 0.126 D loss: 0.325
+epoch: 177 
+ G loss sum: 9.979 G bce loss: 2.084 G lat lon loss: 0.125 D loss: 0.325
+epoch: 178 
+ G loss sum: 9.977 G bce loss: 2.085 G lat lon loss: 0.126 D loss: 0.325
+epoch: 179 
+ G loss sum: 9.961 G bce loss: 2.083 G lat lon loss: 0.125 D loss: 0.325
+epoch: 180 
+ G loss sum: 9.968 G bce loss: 2.085 G lat lon loss: 0.126 D loss: 0.325
+epoch: 181 
+ G loss sum: 9.953 G bce loss: 2.083 G lat lon loss: 0.125 D loss: 0.325
+epoch: 182 
+ G loss sum: 9.945 G bce loss: 2.080 G lat lon loss: 0.125 D loss: 0.325
+epoch: 183 
+ G loss sum: 9.940 G bce loss: 2.082 G lat lon loss: 0.125 D loss: 0.325
+epoch: 184 
+ G loss sum: 9.937 G bce loss: 2.085 G lat lon loss: 0.125 D loss: 0.325
+epoch: 185 
+ G loss sum: 9.937 G bce loss: 2.079 G lat lon loss: 0.126 D loss: 0.325
+epoch: 186 
+ G loss sum: 9.932 G bce loss: 2.086 G lat lon loss: 0.125 D loss: 0.325
+epoch: 187 
+ G loss sum: 9.909 G bce loss: 2.082 G lat lon loss: 0.124 D loss: 0.325
+epoch: 188 
+ G loss sum: 9.909 G bce loss: 2.083 G lat lon loss: 0.125 D loss: 0.325
+epoch: 189 
+ G loss sum: 9.900 G bce loss: 2.086 G lat lon loss: 0.124 D loss: 0.325
+epoch: 190 
+ G loss sum: 9.892 G bce loss: 2.085 G lat lon loss: 0.124 D loss: 0.325
+epoch: 191 
+ G loss sum: 9.892 G bce loss: 2.085 G lat lon loss: 0.124 D loss: 0.325
+epoch: 192 
+ G loss sum: 9.876 G bce loss: 2.083 G lat lon loss: 0.123 D loss: 0.325
+epoch: 193 
+ G loss sum: 9.867 G bce loss: 2.082 G lat lon loss: 0.123 D loss: 0.325
+epoch: 194 
+ G loss sum: 9.880 G bce loss: 2.085 G lat lon loss: 0.125 D loss: 0.325
+epoch: 195 
+ G loss sum: 9.859 G bce loss: 2.082 G lat lon loss: 0.123 D loss: 0.325
+epoch: 196 
+ G loss sum: 9.844 G bce loss: 2.082 G lat lon loss: 0.122 D loss: 0.325
+epoch: 197 
+ G loss sum: 9.852 G bce loss: 2.084 G lat lon loss: 0.123 D loss: 0.325
+epoch: 198 
+ G loss sum: 9.832 G bce loss: 2.081 G lat lon loss: 0.122 D loss: 0.325
+epoch: 199 
+ G loss sum: 9.835 G bce loss: 2.084 G lat lon loss: 0.123 D loss: 0.325
+tensor([ 1.8294e-02, -4.2791e-03,  1.8294e-02,  1.8978e-02,  1.9267e-02,
+        -3.5600e-02, -4.2791e-03, -4.2791e-03, -4.2791e-03, -3.8996e-02,
+        -4.2791e-03,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,  9.9000e+01,
+         9.9000e+01,  9.9000e+01], device='cuda:0')
+tensor([ 0.0324,  0.0815,  0.0369,  0.1606, -0.0378, -0.0698,  0.0789,  0.0950,
+        -0.1120, -0.0846,  0.0053,  0.9163,  1.1508,  0.7323,  0.6124,  0.7069,
+         0.8948,  0.4439,  0.4987,  0.7613,  0.7880,  0.9304,  0.7819,  0.9518,
+         0.9283,  0.7391,  0.9001,  0.9325,  0.8336,  0.5798,  0.6663,  1.0031,
+         0.8215,  0.9672,  0.9572,  1.1946,  0.6128,  0.8594,  0.8742,  0.7810,
+         1.1560,  1.0838,  0.8761,  0.8542,  0.6157,  0.9006,  0.5770,  0.8788,
+         1.0224,  1.2853,  0.9130,  0.8646,  0.9159,  0.5443,  1.2684,  0.7845,
+         0.7770,  1.0896,  0.6336,  0.8741,  0.8432,  1.2100,  0.9321,  0.5811,
+         0.9549,  1.1233,  0.7923,  1.2885,  0.8962,  0.9871,  0.8287,  0.9223,
+         0.9256,  0.7760,  0.8302,  0.9950,  0.5428,  0.8918,  0.7564,  0.7953,
+         0.9243,  0.8470,  0.7560,  0.8345,  1.0428,  0.9907,  0.8834,  0.7242,
+         0.8284,  1.1175,  0.6716], device='cuda:0', grad_fn=<SelectBackward0>)
+finish learning
+all model weight is same
+tensor([[[ 0.0417,  0.0193],
+         [ 0.0408,  0.0195],
+         [ 0.0184,  0.0127],
+         [ 0.0441,  0.0210],
+         [ 0.0443,  0.0254],
+         [ 0.0433,  0.0246],
+         [ 0.0417,  0.0193],
+         [ 0.0468,  0.0229],
+         [-0.0047, -0.0177],
+         [ 0.0443,  0.0254],
+         [ 0.0412,  0.0190],
+         [ 0.0667,  0.0429],
+         [ 0.0334, -0.0030]]], device='cuda:0') tensor([[[ 0.0417,  0.0193,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0408,  0.0195,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0184,  0.0127,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0441,  0.0210,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0443,  0.0254,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0433,  0.0246,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0417,  0.0193,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0468,  0.0229,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [-0.0047, -0.0177,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0443,  0.0254,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0412,  0.0190,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  1.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000],
+         [ 0.0667,  0.0429,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           1.0000,  0.0000,  0.0000,  1.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,  0.0000,
+           0.0000,  0.0000,  0.0000,  0.0000,  1.0000,  0.0000,  0.0000,
+           0.0000]]], device='cuda:0')
+tensor([[0.1865, 0.9735],
+        [0.1684, 0.9972],
+        [0.1772, 1.0188],
+        [0.1557, 0.9892],
+        [0.1544, 0.9808],
+        [0.1385, 0.9792],
+        [0.1396, 0.9838],
+        [0.1496, 1.0108],
+        [0.1467, 0.9933],
+        [0.1053, 0.9404],
+        [0.1537, 0.9664],
+        [0.1241, 0.9775]], device='cuda:0', grad_fn=<SqueezeBackward0>)
+          0         1    2    3    4    5   ...   37   38   39   40   41   42
+0   0.041698  0.019320  1.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+1   0.040804  0.019510  1.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+2   0.018360  0.012714  1.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+3   0.044131  0.021039  0.0  1.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+4   0.044310  0.025399  0.0  0.0  0.0  1.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+5   0.043342  0.024636  0.0  0.0  0.0  1.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+6   0.041698  0.019320  0.0  0.0  0.0  1.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+7   0.046840  0.022862  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+8  -0.004651 -0.017708  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+9   0.044310  0.025399  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+10  0.041182  0.019028  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+11  0.066720  0.042908  0.0  0.0  0.0  0.0  ...  0.0  0.0  1.0  0.0  0.0  0.0
+12  0.033398 -0.003008  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0  0.0
+
+[13 rows x 43 columns]
+           0         1
+0   0.186489  0.973537
+1   0.168390  0.997200
+2   0.177217  1.018760
+3   0.155706  0.989192
+4   0.154448  0.980812
+5   0.138471  0.979167
+6   0.139612  0.983783
+7   0.149637  1.010834
+8   0.146749  0.993335
+9   0.105297  0.940414
+10  0.153694  0.966401
+11  0.124059  0.977458

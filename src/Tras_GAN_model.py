@@ -41,10 +41,10 @@ class discriminator(nn.Module):
 
         self.pos_encoder = PositionalEncoding(d_model=each_hidden_dim * 4, dropout=0.5)
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=each_hidden_dim * 4, nhead=4, batch_first=True
+            d_model=each_hidden_dim * 4, nhead=4, batch_first=True, dropout=0.4
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
-
+        self.dropout = nn.Dropout(0.25)
         self.output_layer = nn.Linear(each_hidden_dim * 4, output_dim)
 
     def forward(self, x, mask):
@@ -62,8 +62,9 @@ class discriminator(nn.Module):
         embedding_all = self.pos_encoder(embedding_all)
         x = self.transformer_encoder(embedding_all, src_key_padding_mask=mask)
         x = torch.mean(x, dim=1)
+        x = self.dropout(x)
         x = self.output_layer(x)
-        x = nn.Sigmoid()(x)
+        # x = nn.Sigmoid()(x)
         return x
 
 

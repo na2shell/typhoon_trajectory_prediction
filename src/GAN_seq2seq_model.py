@@ -71,7 +71,7 @@ class My_encoder(nn.Module):
         x = torch.mean(memory, dim=1)
         x = x.view(x.size(0), 1, x.size(1))
 
-        return memory
+        return x
 
 
 class Seq2SeqTransformer(nn.Module):
@@ -82,7 +82,7 @@ class Seq2SeqTransformer(nn.Module):
         each_emb_size: int,
         nhead: int,
         dim_feedforward: int = 512,
-        dropout: float = 0.1,
+        dropout: float = 0.01,
         DEVICE: str = "cpu"
     ):
         super(Seq2SeqTransformer, self).__init__()
@@ -146,5 +146,5 @@ class Seq2SeqTransformer(nn.Module):
     def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
         print("decode seq input", tgt[0, :, :2])
         return self.transformer.decoder(
-            self.positional_encoding(self.tgt_emb(tgt)), memory
+            self.positional_encoding(self.tgt_emb(tgt)), memory, tgt_mask
         )
