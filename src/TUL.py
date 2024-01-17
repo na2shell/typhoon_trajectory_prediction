@@ -118,7 +118,12 @@ if __name__ == "__main__":
     data_path = "./k-same-net_generated_traj.csv"
     df = pd.read_csv(data_path)
     df["label"] = int_label_encoder.inverse_transform(df["uid"])
+    gen_data_set = MyDataset(
+        df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder, is_applied_geohash=True)
+    
 
+    data_path = "./dev_test_encoded_final.csv"
+    df = pd.read_csv(data_path)
     test_data_set = MyDataset(
         df=df, encoder_dict=encoder_dict, int_label_encoder=int_label_encoder, is_applied_geohash=True)
 
@@ -130,6 +135,13 @@ if __name__ == "__main__":
                                                    num_workers=2)
 
     test_dataloader = torch.utils.data.DataLoader(dataset=test_data_set,
+                                                  batch_size=BATCH_SIZE,
+                                                  shuffle=True,
+                                                  collate_fn=time_collate_fn,
+                                                  drop_last=True,
+                                                  num_workers=2)
+    
+    gen_dataloader = torch.utils.data.DataLoader(dataset=gen_data_set,
                                                   batch_size=BATCH_SIZE,
                                                   shuffle=True,
                                                   collate_fn=time_collate_fn,
@@ -162,6 +174,11 @@ if __name__ == "__main__":
         print("epoch {}: loss {}".format(epoch, sum(losses)/len(losses)))
 
         if epoch % 50 == 0:
+            print("normal test:")
             eval_model(model=model, test_dataloader=test_dataloader, DEVICE=DEVICE)
+
+            print("generated data test:")
+            eval_model(model=model, test_dataloader=gen_dataloader, DEVICE=DEVICE)
+
             torch.save(model.state_dict(
             ), "./TUL_model_weight/tul_model_weight_epoch_{}.pth".format(epoch))
