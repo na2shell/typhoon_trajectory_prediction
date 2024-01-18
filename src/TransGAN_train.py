@@ -16,25 +16,28 @@ from utils_for_seq2seq import (
     create_mask,
     mse_loss_with_mask,
     generate_square_subsequent_mask,
-    hinge_loss
+    hinge_loss,
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
-
+import torch.nn.functional as F
 
 import argparse
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument("--train", action='store_true')
+parser = argparse.ArgumentParser(description="")
+parser.add_argument("--train", action="store_true")
 
 args = parser.parse_args()
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-g_lr = 5e-4
+# DEVICE = "cpu"
+g_lr = 5e-5
 d_lr = 1e-4
-epoch_num = 100
+epoch_num = 500
 BATCH_SIZE = 64
 train = args.train
 latlon_corr = 10
+hour_corr = 1
+category_corr = 1
 bce_loss_corr = 1
 
 bce_loss = nn.BCEWithLogitsLoss()
@@ -90,10 +93,13 @@ dataloader = torch.utils.data.DataLoader(
 if train:
     G.train()
     D.train()
-    for epoch in range(epoch_num):
+    for epoch in range(epoch_num + 1):
         g_losses = []
         g_losses_latlon = []
         g_losses_bce = []
+        g_losses_hour = []
+        g_losses_day = []
+        g_losses_category = []
         d_losses = []
         for data, traj_len, traj_class_indices, label, mask in dataloader:
             data = data.to(DEVICE)
@@ -120,12 +126,19 @@ if train:
                 None,
             )
 
-            _fake_inputs = torch.cat([lat_lon, day, hour, category], dim=-1)
+            hour = hour.round().to(torch.int64)
+            B, L, _ = hour.size()
+            onehot = torch.LongTensor(B, L, 24).zero_().to(DEVICE)
+            hour = torch.where(hour > 23, 23, hour)
+            hour = torch.where(hour < 0, 0, hour)
+            hour_one_hot = onehot.scatter_(2, hour, 1)
+
+            _fake_inputs = torch.cat([lat_lon, day, hour_one_hot, category], dim=-1)
 
             fake_out = D(_fake_inputs, src_padding_mask[:, 1:])
-            fake_label = 0.1*torch.ones(BATCH_SIZE, 1).to(DEVICE)
 
-            
+            fake_label = 0.1 * torch.ones(BATCH_SIZE, 1).to(DEVICE)
+
             outputs = torch.cat((real_outputs, fake_out), 0)
             targets = torch.cat((real_label, fake_label), 0)
             D_loss = bce_loss(outputs, targets)
@@ -153,7 +166,14 @@ if train:
                 None,
             )
 
-            fake_inputs = torch.cat([lat_lon, day, hour, category], dim=-1)
+            hour_int = hour.round().to(torch.int64)
+            B, L, _ = hour_int.size()
+            onehot = torch.LongTensor(B, L, 24).zero_().to(DEVICE)
+            hour_int = torch.where(hour_int > 23, 23, hour_int)
+            hour_int = torch.where(hour_int < 0, 0, hour_int)
+            hour_one_hot = onehot.scatter_(2, hour_int, 1)
+
+            fake_inputs = torch.cat([lat_lon, day, hour_one_hot, category], dim=-1)
             # fake_inputs = lat_lon
 
             # lat, lng, day, hour, category = G(noise_data)
@@ -186,27 +206,38 @@ if train:
             # print("size", torch.flatten(traj_class_indices[:, 1:, 2]).size())
 
             day_loss = ce_loss(
-                fake_inputs[:, :, 2:9].view(-1, 7),
+                day.view(-1, 7),
                 torch.flatten(traj_class_indices[:, 1:, 2]).to(torch.long),
             )
             category_loss = ce_loss(
-                fake_inputs[:, :, 9:19].view(-1, 10),
+                category.view(-1, 10),
                 torch.flatten(traj_class_indices[:, 1:, 3]).to(torch.long),
             )
-            hour_loss = ce_loss(
-                fake_inputs[:, :, 19:].view(-1, 24),
-                torch.flatten(traj_class_indices[:, 1:, 4]).to(torch.long),
+
+            hour_loss = torch.sqrt(
+                mse_loss_with_mask(
+                    torch.flatten(hour),
+                    torch.flatten(traj_class_indices[:, 1:, 4]).to(torch.long),
+                    ignored_index=111,
+                )
             )
+
+            # hour_loss = ce_loss(
+            #     fake_inputs[:, :, 19:].view(-1, 24),
+            #     torch.flatten(traj_class_indices[:, 1:, 4]).to(torch.long),
+            # )
 
             G_loss = (
-                bce_loss_corr*G_loss_GAN
+                bce_loss_corr * G_loss_GAN
                 + latlon_corr * G_loss_equation
                 + day_loss
-                + category_loss
-                + hour_loss
+                + category_loss * category_corr
+                + hour_corr * hour_loss
             )
 
-            # G_loss = latlon_corr * G_loss_equation 
+            # G_loss = category_loss
+
+            # G_loss = latlon_corr * G_loss_equation
 
             # G_loss = G_loss_GAN
 
@@ -217,16 +248,26 @@ if train:
 
             g_losses.append(G_loss.item())
             g_losses_latlon.append(G_loss_equation.item())
+            g_losses_hour.append(hour_loss.item())
+            g_losses_day.append(day_loss.item())
+            g_losses_category.append(category_loss.item())
 
         print(
-            "epoch: {} \n G loss sum: {:.3f} G bce loss: {:.3f} G lat lon loss: {:.3f} D loss: {:.3f}".format(
+            "epoch: {} \n G loss sum: {:.3f} G bce loss: {:.3f} "
+            "G lat lon loss: {:.3f} G hour loss: {:.3f} G day loss: {:.3f} G category loss: {:.3f} D loss: {:.3f}".format(
                 epoch,
                 sum(g_losses) / len(g_losses),
                 sum(g_losses_bce) / len(g_losses_bce),
                 sum(g_losses_latlon) / len(g_losses_latlon),
+                sum(g_losses_hour) / len(g_losses_hour),
+                sum(g_losses_day) / len(g_losses_day),
+                sum(g_losses_category) / len(g_losses_category),
                 sum(d_losses) / len(d_losses),
             )
         )
+
+        if epoch % 50 == 0 and epoch != 0:
+            torch.save(G.state_dict(), "generator_{}_epoch.pt".format(epoch))
 
     print(data[0, :, 0])
     print(fake_inputs[0, :, 0])

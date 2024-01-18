@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.nn import Transformer, TransformerEncoder, TransformerEncoderLayer, LayerNorm
 import math
 from utils_for_seq2seq import PositionalEncoding
-
+import torch.nn.functional as F
 
 class Traj_Embedding(nn.Module):
     def __init__(self, emb_size):
@@ -40,13 +40,13 @@ class re_converter(nn.Module):
         super(re_converter, self).__init__()
         self.fc_latlon = nn.Linear(emb_size, 2)
         self.fc_day = nn.Linear(emb_size, 7)
-        self.fc_hour = nn.Linear(emb_size, 24)
+        self.fc_hour = nn.Linear(emb_size, 1)
         self.fc_category = nn.Linear(emb_size, 10)
 
     def forward(self, outs):
         lat_lon = self.fc_latlon(outs)
         day = self.fc_day(outs)
-        hour = self.fc_hour(outs)
+        hour = F.relu(self.fc_hour(outs))
         category = self.fc_category(outs)
 
         return lat_lon, day, hour, category
@@ -71,7 +71,7 @@ class My_encoder(nn.Module):
         x = torch.mean(memory, dim=1)
         x = x.view(x.size(0), 1, x.size(1))
 
-        return x
+        return _memory
 
 
 class Seq2SeqTransformer(nn.Module):
@@ -82,7 +82,7 @@ class Seq2SeqTransformer(nn.Module):
         each_emb_size: int,
         nhead: int,
         dim_feedforward: int = 512,
-        dropout: float = 0.01,
+        dropout: float = 0.1,
         DEVICE: str = "cpu"
     ):
         super(Seq2SeqTransformer, self).__init__()
@@ -119,7 +119,7 @@ class Seq2SeqTransformer(nn.Module):
         memory_key_padding_mask: Tensor,
     ):
         src_emb = self.positional_encoding(self.src_emb(src))
-        tgt_emb = self.positional_encoding(self.src_emb(trg))
+        tgt_emb = self.positional_encoding(self.tgt_emb(trg))
 
         outs = self.transformer(
             src_emb,
@@ -144,7 +144,7 @@ class Seq2SeqTransformer(nn.Module):
         )
 
     def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
-        print("decode seq input", tgt[0, :, :2])
+        # print("decode seq input", tgt[0, :, :2])
         return self.transformer.decoder(
             self.positional_encoding(self.tgt_emb(tgt)), memory, tgt_mask
         )

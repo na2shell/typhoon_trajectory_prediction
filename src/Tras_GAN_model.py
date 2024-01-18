@@ -134,7 +134,7 @@ class generator_decoder(nn.Module):
         x = self.transformer_encoder(x, src_key_padding_mask=mask)
         lat_lon = self.fc_latlon(x)
         day = self.fc_day(x)
-        hour = self.fc_hour(x)
+        hour = F.relu(self.fc_hour(x))
         category = self.fc_category(x)
 
         return lat_lon, day, hour, category

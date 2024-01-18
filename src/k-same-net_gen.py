@@ -22,6 +22,7 @@ import random
 
 TEST_BATCH_SIZE = 1
 is_check = False
+k = 0
 target_dict = {}
 target_dict["day"] = [i for i in range(7)]
 target_dict["hour"] = [i for i in range(24)]
@@ -45,7 +46,7 @@ G_runtime = Seq2SeqTransformer(
     num_encoder_layers=2, num_decoder_layers=2, each_emb_size=64, nhead=2, DEVICE=DEVICE
 )
 G_runtime = G_runtime.to(DEVICE)
-G_runtime.load_state_dict(torch.load("generator_n.pt"))
+G_runtime.load_state_dict(torch.load("generator_500_epoch.pt"))
 G_runtime.eval()
 
 train_data_set = MyDataset(
@@ -106,19 +107,27 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(test_datal
     )
 
     memory = G_runtime.encode(data, src_mask)
-    k_uid = random.sample(uid_list, 1)[0]
-    another_memory = torch.tensor(each_person_latent_space_dict[k_uid][0]).view(
-        1, 1, 256
-    ).to(DEVICE)
     uid = label.item()
 
-    mixed_memory = memory + another_memory
+    mixed_memory = memory
+    if k != 0:
+        for _ in range(k):
+            k_uid = random.sample(uid_list, 1)[0]
+            another_memory = torch.tensor(each_person_latent_space_dict[k_uid][0]).view(
+                1, 1, 256
+            ).to(DEVICE)
+            mixed_memory += another_memory
+        
+        mixed_memory /= k
+    
 
     gen_traj_emb = G_runtime.decode(tgt_input, mixed_memory, tgt_mask)
     lat_lon, day, hour, category = G_runtime.re_converter(gen_traj_emb)
     lat_lon = lat_lon.squeeze().to("cpu").detach().numpy().copy()
     day = torch.argmax(day, dim=2).squeeze().to("cpu").detach().numpy().copy()
-    hour = torch.argmax(hour, dim=2).squeeze().to("cpu").detach().numpy().copy()
+
+    hour = torch.where(hour > 23, 23, hour)
+    hour = hour.round().to(torch.int64).squeeze().to("cpu").detach().numpy().copy()
     category = torch.argmax(category, dim=2).squeeze().to("cpu").detach().numpy().copy()
     
     tmp_df[["lat", "lon"]] = lat_lon
@@ -132,7 +141,8 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(test_datal
     if i > 10 and is_check:
         break
 
-df_result.to_csv("k-same-net_generated_traj.csv", index=None)
+
+df_result.to_csv("k-same-net_generated_traj_k={}.csv".format(k), index=None)
 
 
 traj = data.squeeze()
