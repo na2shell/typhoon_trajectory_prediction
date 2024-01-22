@@ -5,17 +5,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from traj_Dataset import MyDataset
 from utils import (
-    convert_onehot,
-    convert_label_to_inger,
     build_encoder,
     build_int_encoder,
     time_collate_fn,
 )
 from utils_for_seq2seq import (
     create_mask,
-    mse_loss_with_mask,
-    generate_square_subsequent_mask,
-    hinge_loss,
+    MUITAS
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
 import random
@@ -23,7 +19,7 @@ import tqdm
 
 TEST_BATCH_SIZE = 1
 is_check = False
-k = 2
+k = 10
 _k = k - 1
 target_dict = {}
 target_dict["day"] = [i for i in range(7)]
@@ -79,7 +75,7 @@ test_dataloader = torch.utils.data.DataLoader(
 
 each_person_latent_space_dict = {}
 uid_set = set()
-for data, traj_len, traj_class_indices, label, mask in test_dataloader:
+for data, traj_len, traj_class_indices, label, mask, _ in test_dataloader:
     data = data.to(DEVICE)
     mask = mask.to(DEVICE)
 
@@ -107,7 +103,7 @@ for data, traj_len, traj_class_indices, label, mask in test_dataloader:
 uid_list = list(uid_set)
 
 df_result = pd.DataFrame()
-for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(tqdm.tqdm(test_dataloader)):
+for i, (data, traj_len, traj_class_indices, label, mask, tid) in enumerate(tqdm.tqdm(test_dataloader)):
     tmp_df = pd.DataFrame()
 
     data = data.to(DEVICE)
@@ -151,7 +147,7 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(tqdm.tqdm(
     tmp_df["hour"] = hour
     tmp_df["category"] = category
     tmp_df["uid"] = uid
-    tmp_df["tid"] = i
+    tmp_df["tid"] = tid.item()
 
     df_result = pd.concat([df_result, tmp_df], axis=0)
     if i > 10 and is_check:
@@ -159,8 +155,6 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(tqdm.tqdm(
 
 
 df_result.to_csv("k-same-net_generated_traj_k={}.csv".format(k), index=None)
-
-
 traj = data.squeeze()
 
 pred_y = lat_lon

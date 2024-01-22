@@ -7,16 +7,17 @@ import geohash
 
 
 def time_collate_fn(batch):
-    traj, seq_len, traj_class_indices, labels = list(zip(*batch))
+    traj, seq_len, traj_class_indices, labels, tids = list(zip(*batch))
     x = torch.nn.utils.rnn.pad_sequence(traj, batch_first=True, padding_value=99)
     traj_class_indices = torch.nn.utils.rnn.pad_sequence(
         traj_class_indices, batch_first=True, padding_value=111
     )
     seq_len = torch.stack(seq_len)
     labels = torch.stack(labels)
+    tids = torch.stack(tids)
     mask = x[:, :, 1] == 99
 
-    return x, seq_len, traj_class_indices, labels, mask
+    return x, seq_len, traj_class_indices, labels, mask, tids
 
 # it is hard to learn the hashed position for generator
 # thus I convert actual latlon to geohash just before feeding it into discriminator

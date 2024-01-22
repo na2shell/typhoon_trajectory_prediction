@@ -17,14 +17,17 @@ from utils_for_seq2seq import (
     mse_loss_with_mask,
     generate_square_subsequent_mask,
     hinge_loss,
+    MUITAS
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
 import torch.nn.functional as F
+
 
 import argparse
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--train", action="store_true")
+parser.add_argument("--over_write", action="store_true")
 
 args = parser.parse_args()
 
@@ -33,8 +36,9 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 g_lr = 5e-5
 d_lr = 1e-4
 epoch_num = 500
-BATCH_SIZE = 64
+BATCH_SIZE = 2
 train = args.train
+is_overwrite = args.over_write
 latlon_corr = 10
 hour_corr = 1
 category_corr = 1
@@ -89,6 +93,21 @@ dataloader = torch.utils.data.DataLoader(
     num_workers=8,
 )
 
+def anytime_zero(x, y):
+    return 0
+
+def match_or_not(x, y):
+    if x == y:
+        return 1
+    else:
+        return 0
+
+dist_functions = [anytime_zero for _ in range(2)] + [match_or_not for _ in range(41)]
+thresholds = [0.5 for _ in range(43)]
+features = [i for i in range(43)]
+weights = torch.tensor([1 for _ in range(43)])
+
+Utility_function_class = MUITAS(dist_functions, thresholds, features, weights)
 
 if train:
     G.train()
@@ -222,6 +241,11 @@ if train:
                 )
             )
 
+            # similarity = Utility_function_class.similarity(fake_inputs[:, :, :], data[:, 1:, :])
+            # print(similarity)
+            # exit()
+
+
             # hour_loss = ce_loss(
             #     fake_inputs[:, :, 19:].view(-1, 24),
             #     torch.flatten(traj_class_indices[:, 1:, 4]).to(torch.long),
@@ -236,9 +260,7 @@ if train:
             )
 
             # G_loss = category_loss
-
             # G_loss = latlon_corr * G_loss_equation
-
             # G_loss = G_loss_GAN
 
             # print("G_loss", G_loss)
@@ -266,14 +288,14 @@ if train:
             )
         )
 
-        if epoch % 50 == 0 and epoch != 0:
+        if epoch % 50 == 0 and epoch != 0 and is_overwrite:
             torch.save(
                 G.state_dict(),
                 "/src/generator_weight/generator_{}_epoch.pt".format(epoch),
             )
 
-    print(data[0, :, 0])
-    print(fake_inputs[0, :, 0])
+    print(data[0, :, :])
+    print(fake_inputs[0, :, :])
     print("finish learning")
     torch.save(G.state_dict(), "/src/generator_weight/generator_n.pt")
 

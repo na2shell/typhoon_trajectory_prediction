@@ -52,8 +52,9 @@ class MyDataset(Dataset):
         df_tmp = df_tmp.drop("tid", axis=1)
         traj_class_indices = torch.tensor(df_tmp.values, dtype=torch.float)
         label = torch.tensor(self.dict_tid_label[tid])
+        _tid = torch.tensor(tid)
 
-        return traj, seq_len, traj_class_indices, label
+        return traj, seq_len, traj_class_indices, label, _tid
 
     def calculate_geohash_onehot(self):
         precision = 8
