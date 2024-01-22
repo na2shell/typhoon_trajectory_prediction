@@ -4,7 +4,7 @@ import numpy as np
 df_original = pd.read_csv("/src/dev_train_encoded_final.csv")
 # df_generated = pd.read_csv("/src/k-same-net_generated_traj.csv")
 # df_generated = pd.read_csv("/src/dev_test_encoded_final.csv")
-df_generated = pd.read_csv("/src/k-same-net_generated_traj_k=0.csv")
+df_generated = pd.read_csv("/src/k-same-net_generated_traj_k=2.csv")
 
 
 category_dict = {}

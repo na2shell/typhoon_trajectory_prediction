@@ -71,7 +71,7 @@ class My_encoder(nn.Module):
         x = torch.mean(memory, dim=1)
         x = x.view(x.size(0), 1, x.size(1))
 
-        return _memory
+        return x
 
 
 class Seq2SeqTransformer(nn.Module):

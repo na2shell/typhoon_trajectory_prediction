@@ -267,19 +267,22 @@ if train:
         )
 
         if epoch % 50 == 0 and epoch != 0:
-            torch.save(G.state_dict(), "generator_{}_epoch.pt".format(epoch))
+            torch.save(
+                G.state_dict(),
+                "/src/generator_weight/generator_{}_epoch.pt".format(epoch),
+            )
 
     print(data[0, :, 0])
     print(fake_inputs[0, :, 0])
     print("finish learning")
-    torch.save(G.state_dict(), "generator_n.pt")
+    torch.save(G.state_dict(), "/src/generator_weight/generator_n.pt")
 
 
 G_runtime = Seq2SeqTransformer(
     num_encoder_layers=2, num_decoder_layers=2, each_emb_size=64, nhead=2, DEVICE=DEVICE
 )
 G_runtime = G_runtime.to(DEVICE)
-G_runtime.load_state_dict(torch.load("generator_n.pt"))
+G_runtime.load_state_dict(torch.load("/src/generator_weight/generator_n.pt"))
 G_runtime.eval()
 
 params_G = G.state_dict()

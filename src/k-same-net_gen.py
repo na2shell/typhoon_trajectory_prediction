@@ -19,16 +19,31 @@ from utils_for_seq2seq import (
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
 import random
+import tqdm
 
 TEST_BATCH_SIZE = 1
 is_check = False
-k = 0
+k = 2
+_k = k - 1
 target_dict = {}
 target_dict["day"] = [i for i in range(7)]
 target_dict["hour"] = [i for i in range(24)]
 target_dict["category"] = [i for i in range(10)]
 
 encoder_dict = {}
+
+
+def k_person_choose(src_uid, uid_list, k, method="random"):
+    if method == "random":
+        k_uid = random.sample(uid_list, k)
+        return k_uid
+
+    df = pd.read_csv("similar_user_data.csv")
+    # print(df.head())
+    similar_users = df[str(src_uid)].values
+    similar_users_k = similar_users[1 : k + 1]
+    return similar_users_k
+
 
 for col in ["day", "category", "hour"]:
     target = target_dict[col]
@@ -46,7 +61,7 @@ G_runtime = Seq2SeqTransformer(
     num_encoder_layers=2, num_decoder_layers=2, each_emb_size=64, nhead=2, DEVICE=DEVICE
 )
 G_runtime = G_runtime.to(DEVICE)
-G_runtime.load_state_dict(torch.load("generator_500_epoch.pt"))
+G_runtime.load_state_dict(torch.load("/src/generator_weight/generator_500_epoch.pt"))
 G_runtime.eval()
 
 train_data_set = MyDataset(
@@ -92,7 +107,7 @@ for data, traj_len, traj_class_indices, label, mask in test_dataloader:
 uid_list = list(uid_set)
 
 df_result = pd.DataFrame()
-for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(test_dataloader):
+for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(tqdm.tqdm(test_dataloader)):
     tmp_df = pd.DataFrame()
 
     data = data.to(DEVICE)
@@ -110,16 +125,17 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(test_datal
     uid = label.item()
 
     mixed_memory = memory
-    if k != 0:
-        for _ in range(k):
-            k_uid = random.sample(uid_list, 1)[0]
-            another_memory = torch.tensor(each_person_latent_space_dict[k_uid][0]).view(
-                1, 1, 256
-            ).to(DEVICE)
+    if _k != 0:
+        uids = k_person_choose(uid, uid_list, _k, method="latent")
+        for uid in uids:
+            another_memory = (
+                torch.tensor(each_person_latent_space_dict[uid][0])
+                .view(1, 1, 256)
+                .to(DEVICE)
+            )
             mixed_memory += another_memory
-        
-        mixed_memory /= k
-    
+
+        mixed_memory /= _k
 
     gen_traj_emb = G_runtime.decode(tgt_input, mixed_memory, tgt_mask)
     lat_lon, day, hour, category = G_runtime.re_converter(gen_traj_emb)
@@ -129,14 +145,14 @@ for i, (data, traj_len, traj_class_indices, label, mask) in enumerate(test_datal
     hour = torch.where(hour > 23, 23, hour)
     hour = hour.round().to(torch.int64).squeeze().to("cpu").detach().numpy().copy()
     category = torch.argmax(category, dim=2).squeeze().to("cpu").detach().numpy().copy()
-    
+
     tmp_df[["lat", "lon"]] = lat_lon
     tmp_df["day"] = day
     tmp_df["hour"] = hour
-    tmp_df["category"] = category 
+    tmp_df["category"] = category
     tmp_df["uid"] = uid
     tmp_df["tid"] = i
-    
+
     df_result = pd.concat([df_result, tmp_df], axis=0)
     if i > 10 and is_check:
         break
