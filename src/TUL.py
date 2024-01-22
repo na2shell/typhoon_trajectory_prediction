@@ -43,7 +43,7 @@ if __name__ == "__main__":
         target = target_dict[col]
         encoder_dict[col] = build_encoder(target)
 
-    data_path = "./dev_train_encoded_final.csv"
+    data_path = "/data/dev_train_encoded_final.csv"
     df = pd.read_csv(data_path)
     int_label_encoder = build_int_encoder(df["label"].unique())
     print(int_label_encoder.classes_)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         is_applied_geohash=True,
     )
 
-    data_path = "./k-same-net_generated_traj_k=2.csv"
+    data_path = "/data/k-same-net_generated_traj_k=2.csv"
     df = pd.read_csv(data_path)
     df["label"] = int_label_encoder.inverse_transform(df["uid"])
     gen_data_set = MyDataset(
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         is_applied_geohash=True,
     )
 
-    data_path = "./dev_test_encoded_final.csv"
+    data_path = "/data/dev_test_encoded_final.csv"
     df = pd.read_csv(data_path)
     test_data_set = MyDataset(
         df=df,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             if epoch % 50 == 0:
                 torch.save(
                     model.state_dict(),
-                    "./TUL_model_weight/tul_model_weight_epoch_{}.pth".format(epoch),
+                    "/src/TUL_model_weight/tul_model_weight_epoch_{}.pth".format(epoch),
                 )
 
     model.load_state_dict(

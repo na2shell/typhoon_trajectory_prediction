@@ -1,6 +1,6 @@
 version: "3"
 services:
-  gcn_env:
+  ML_env:
     build: 
       context: ./
       dockerfile: Dockerfile

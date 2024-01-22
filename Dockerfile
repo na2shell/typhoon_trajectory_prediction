@@ -88,4 +88,4 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
-RUN python -m pip --no-cache-dir install --upgrade h3==4.0.0b2
+RUN python -m pip --no-cache-dir install --upgrade h3==4.0.0b2 python-geohash
