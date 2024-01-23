@@ -7,7 +7,7 @@ import geohash
 
 
 class MyDataset(Dataset):
-    def __init__(self, df, encoder_dict, int_label_encoder, is_applied_geohash=False):
+    def __init__(self, df, encoder_dict, int_label_encoder, is_applied_geohash=False, dataset_name="NYC_Forsequence"):
         super().__init__()
         self.is_applied_geohash = is_applied_geohash
         self.df = df

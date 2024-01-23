@@ -590,3 +590,43 @@ tensor([[0.1865, 0.9735],
 9   0.105297  0.940414
 10  0.153694  0.966401
 11  0.124059  0.977458
+[ 7568 10120 10288 10365 10375 10594 10776 10798 10856 10881 10917 10987
+ 11103 20291 40060 40076 50019 50101 50108 70435 70451 70459 70463 70484
+ 70487 70489 70491 70494 70516 70520 70522 70523 70543 70590 70676 70787
+ 70811 70863 70872 71109 71122 71298 71360 71469 71579 71773 71798 71829
+ 71843 72000 72048 72085 72103 72182 72292 72350 72513 72557 72747 72768
+ 72891 72956 72999 73017 73023 73058 73059 73096 73121 73206 73232 73306
+ 73329 73382 73428 73618 81733 81938 82016 82020 82117 82148 82162 82175
+ 82199 82351 82356 82363 82422 82426 82486 82493 82523 82530 82665 82693
+ 82758 82823 82846 82918 82953 82956 82972 83001 83099 83233 83245 83290
+ 83308 83347 83410 83464 83479 83681 83701 83711 83770 83771 83786 83787
+ 83897 83932 83936 83944 84058 84073 84076 84126 84127 84137 84151 84184
+ 84214 84217 84238 84251 84262 84274 84278 84303 84311 84327 84328 84398
+ 84533 84608 84657 84658 84665 84727 84803 84808 84813 84816 84825 84875
+ 84887 84903 84959 85044 85066 85081 85105 85222 85223 85226 85246 85254
+ 85280 85321 85327 85355 85373 85426 85458 85529 85557 85561 85562 85563
+ 85572 85594 85595 85599 85617 85643 85669 85690 85701 85737 85738 85739
+ 85754 85791 85806 85845 85866 85891 85913 85916 85950 86008 86010 86028
+ 86035 86040 86066 86068 86080 86081 86114 86124 86132 86154 86161 86169
+ 86173 86199 86209 86213 86214 86225 86232 86241 86245 86269 86270 86271
+ 86285 86290 86291 86295 86350 90001 90003 90005]
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:458: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:458: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+/usr/local/lib/python3.8/dist-packages/sklearn/base.py:458: UserWarning: X has feature names, but OneHotEncoder was fitted without feature names
+  warnings.warn(
+epoch: 0 
+ G loss sum: 23.284 G bce loss: 1.286 G lat lon loss: 0.397 G hour loss: 10.314 G day loss: 1.945 G category loss: 2.578 G dtw loss: 5.767 D loss: 0.453
+/usr/local/lib/python3.8/dist-packages/torch/nn/functional.py:5076: UserWarning: Support for mismatched key_padding_mask and attn_mask is deprecated. Use same type for both instead.
+  warnings.warn(
+/src/soft_dtw_cuda.py:131: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at ../torch/csrc/tensor/python_tensor.cpp:83.)
+  gamma = torch.cuda.FloatTensor([gamma])
+/usr/local/lib/python3.8/dist-packages/numba/cuda/dispatcher.py:536: NumbaPerformanceWarning: Grid size 3 will likely result in GPU under-utilization due to low occupancy.
+  warn(NumbaPerformanceWarning(msg))
+/usr/local/lib/python3.8/dist-packages/numba/cuda/dispatcher.py:536: NumbaPerformanceWarning: Grid size 3 will likely result in GPU under-utilization due to low occupancy.
+  warn(NumbaPerformanceWarning(msg))
+/usr/local/lib/python3.8/dist-packages/numba/cuda/dispatcher.py:536: NumbaPerformanceWarning: Grid size 3 will likely result in GPU under-utilization due to low occupancy.
+  warn(NumbaPerformanceWarning(msg))
+/usr/local/lib/python3.8/dist-packages/torch/nn/functional.py:5076: UserWarning: Support for mismatched key_padding_mask and attn_mask is deprecated. Use same type for both instead.
+  warnings.warn(

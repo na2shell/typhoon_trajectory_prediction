@@ -6,8 +6,6 @@ import pandas as pd
 from traj_Dataset import MyDataset
 from Tras_GAN_model import discriminator
 from utils import (
-    convert_onehot,
-    convert_label_to_inger,
     build_encoder,
     build_int_encoder,
     time_collate_fn,
@@ -16,36 +14,43 @@ from utils_for_seq2seq import (
     create_mask,
     mse_loss_with_mask,
     generate_square_subsequent_mask,
-    hinge_loss,
-    MUITAS
 )
 from GAN_seq2seq_model import Seq2SeqTransformer
-import torch.nn.functional as F
+import os
 
+# from soft_dtw import SoftDTW
+from soft_dtw_cuda import SoftDTW
 
 import argparse
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--train", action="store_true")
 parser.add_argument("--over_write", action="store_true")
+parser.add_argument("--dataset_name", default="CREST")
 
 args = parser.parse_args()
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # DEVICE = "cpu"
-g_lr = 5e-5
-d_lr = 1e-4
+dataset_name = args.dataset_name
+
+g_lr = 1e-4
+d_lr = 1e-5
 epoch_num = 500
-BATCH_SIZE = 2
+BATCH_SIZE = 256
 train = args.train
 is_overwrite = args.over_write
 latlon_corr = 10
 hour_corr = 1
-category_corr = 1
+day_corr = 1
+category_corr = 0
 bce_loss_corr = 1
 
 bce_loss = nn.BCEWithLogitsLoss()
 ce_loss = nn.CrossEntropyLoss(ignore_index=111)
+DTW_criterion = SoftDTW(
+    gamma=1.0, normalize=True, use_cuda=True
+)  # just like nn.MSELoss()
 mean = 0
 std = 0
 
@@ -74,7 +79,10 @@ for col in ["day", "category", "hour"]:
     target = target_dict[col]
     encoder_dict[col] = build_encoder(target)
 
-data_path = "./dev_train_encoded_final.csv"
+
+# data_path = "./dev_train_encoded_final.csv"
+data_path = "/data/original_pos_60min_thin_out.csv"
+# data_path = "/data/original_pos_60min.csv"
 df = pd.read_csv(data_path)
 int_label_encoder = build_int_encoder(df["label"].unique())
 print(int_label_encoder.classes_)
@@ -93,21 +101,28 @@ dataloader = torch.utils.data.DataLoader(
     num_workers=8,
 )
 
-def anytime_zero(x, y):
-    return 0
+# def anytime_zero(x, y):
+#     return 0
 
-def match_or_not(x, y):
-    if x == y:
-        return 1
-    else:
-        return 0
+# def match_or_not(x, y):
+#     if x == y:
+#         return 1
+#     else:
+#         return 0
 
-dist_functions = [anytime_zero for _ in range(2)] + [match_or_not for _ in range(41)]
-thresholds = [0.5 for _ in range(43)]
-features = [i for i in range(43)]
-weights = torch.tensor([1 for _ in range(43)])
+# dist_functions = [anytime_zero for _ in range(2)] + [match_or_not for _ in range(41)]
+# thresholds = [0.5 for _ in range(43)]
+# features = [i for i in range(43)]
+# weights = torch.tensor([1 for _ in range(43)])
 
-Utility_function_class = MUITAS(dist_functions, thresholds, features, weights)
+# Utility_function_class = MUITAS(dist_functions, thresholds, features, weights)
+
+
+norm_type = 2  # L2 norm
+grad_clip = 0.1  # thereshold
+
+weight_save_dir = "/src/generator_weight/{}/".format(dataset_name)
+os.makedirs(weight_save_dir, exist_ok=True)
 
 if train:
     G.train()
@@ -119,8 +134,10 @@ if train:
         g_losses_hour = []
         g_losses_day = []
         g_losses_category = []
+        g_losses_dtw = []
         d_losses = []
-        for data, traj_len, traj_class_indices, label, mask in dataloader:
+        for data, traj_len, traj_class_indices, label, mask, tid in dataloader:
+            # print("data", torch.isnan(data).any())
             data = data.to(DEVICE)
             mask = mask.to(DEVICE)
 
@@ -153,6 +170,7 @@ if train:
             hour_one_hot = onehot.scatter_(2, hour, 1)
 
             _fake_inputs = torch.cat([lat_lon, day, hour_one_hot, category], dim=-1)
+            # print("fake input", torch.isnan(_fake_inputs).any())
 
             fake_out = D(_fake_inputs, src_padding_mask[:, 1:])
 
@@ -169,6 +187,11 @@ if train:
             # print("D_loss", D_loss)
             D_optimizer.zero_grad()
             D_loss.backward()
+
+            # nn.utils.clip_grad_norm_(
+            #     parameters=D.parameters(), max_norm=grad_clip, norm_type=norm_type
+            # )
+
             D_optimizer.step()
 
             d_losses.append(D_loss.item())
@@ -241,10 +264,43 @@ if train:
                 )
             )
 
+            # B = data.size(0)
+            # ignored_index = 99
+            # _data = data.detach().clone()
+            # _lat_lon = lat_lon.detach().clone()
+            # # print(_data.requires_grad)
+
+            # for b in range(B):
+            #     pad_indeies = torch.flatten(_data[b, :, 0]) == ignored_index
+            #     if pad_indeies.any():
+            #         pad_index = _data[b : b + 1, pad_indeies, :2].size(1)
+            #         _data[b : b + 1, pad_indeies, :2] = _lat_lon[
+            #             b : b + 1, -pad_index:, :
+            #         ].detach()
+
+            # dtw_loss = DTW_criterion(_data[:, 1:, :2], lat_lon)
+
+            B = data.size(0)
+            ignored_index = 99
+
+            dtw_loss = torch.zeros(B)
+            for b in range(B):
+                pad_indeies = torch.flatten(data[b, :, 0]) == ignored_index
+                pad_index = lat_lon.size(1)
+                if pad_indeies.any():
+                    pad_index = data[b : b + 1, ~pad_indeies, :2].size(1)
+
+                dtw_loss[b] = DTW_criterion(
+                    data[b : b + 1, :pad_index, :2],
+                    lat_lon[b : b + 1, :pad_index, :],
+                )
+
+            # print(dtw_loss.grad_fn)
+            G_dtw_loss = torch.mean(dtw_loss)
+
             # similarity = Utility_function_class.similarity(fake_inputs[:, :, :], data[:, 1:, :])
             # print(similarity)
             # exit()
-
 
             # hour_loss = ce_loss(
             #     fake_inputs[:, :, 19:].view(-1, 24),
@@ -257,7 +313,11 @@ if train:
                 + day_loss
                 + category_loss * category_corr
                 + hour_corr * hour_loss
+                + G_dtw_loss
             )
+
+            if torch.isnan(fake_outputs).any():
+                exit()
 
             # G_loss = category_loss
             # G_loss = latlon_corr * G_loss_equation
@@ -266,17 +326,23 @@ if train:
             # print("G_loss", G_loss)
             G_optimizer.zero_grad()
             G_loss.backward()
+
+            # nn.utils.clip_grad_norm_(
+            #     parameters=G.parameters(), max_norm=grad_clip, norm_type=norm_type
+            # )
+
             G_optimizer.step()
 
             g_losses.append(G_loss.item())
             g_losses_latlon.append(G_loss_equation.item())
             g_losses_hour.append(hour_loss.item())
             g_losses_day.append(day_loss.item())
+            g_losses_dtw.append(G_dtw_loss.item())
             g_losses_category.append(category_loss.item())
 
         print(
             "epoch: {} \n G loss sum: {:.3f} G bce loss: {:.3f} "
-            "G lat lon loss: {:.3f} G hour loss: {:.3f} G day loss: {:.3f} G category loss: {:.3f} D loss: {:.3f}".format(
+            "G lat lon loss: {:.3f} G hour loss: {:.3f} G day loss: {:.3f} G category loss: {:.3f} G dtw loss: {:.3f} D loss: {:.3f}".format(
                 epoch,
                 sum(g_losses) / len(g_losses),
                 sum(g_losses_bce) / len(g_losses_bce),
@@ -284,14 +350,15 @@ if train:
                 sum(g_losses_hour) / len(g_losses_hour),
                 sum(g_losses_day) / len(g_losses_day),
                 sum(g_losses_category) / len(g_losses_category),
+                sum(g_losses_dtw) / len(g_losses_dtw),
                 sum(d_losses) / len(d_losses),
             )
         )
 
-        if epoch % 50 == 0 and epoch != 0 and is_overwrite:
+        if epoch % 10 == 0 and epoch != 0 and is_overwrite:
             torch.save(
                 G.state_dict(),
-                "/src/generator_weight/generator_{}_epoch.pt".format(epoch),
+                weight_save_dir + "generator_{}_epoch.pt".format(epoch),
             )
 
     print(data[0, :, :])
@@ -304,7 +371,7 @@ G_runtime = Seq2SeqTransformer(
     num_encoder_layers=2, num_decoder_layers=2, each_emb_size=64, nhead=2, DEVICE=DEVICE
 )
 G_runtime = G_runtime.to(DEVICE)
-G_runtime.load_state_dict(torch.load("/src/generator_weight/generator_n.pt"))
+G_runtime.load_state_dict(torch.load(weight_save_dir + "generator_20_epoch.pt"))
 G_runtime.eval()
 
 params_G = G.state_dict()
@@ -327,7 +394,7 @@ test_dataloader = torch.utils.data.DataLoader(
     num_workers=2,
 )
 
-for data, traj_len, traj_class_indices, label, mask in test_dataloader:
+for data, traj_len, traj_class_indices, label, mask, tid in test_dataloader:
     data = data.to(DEVICE)
     mask = mask.to(DEVICE)
 
